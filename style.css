@@ -1,112 +1,214 @@
-/* ===== RESET ===== */
+/* =======================================================
+   PSIHO CRISTIAN MANEA - STYLE.CSS
+======================================================= */
 
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
+
+/* ===== RESET GENERAL ===== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
 
-/* ===== PAGINA ===== */
+/* =======================================================
+   FUNDAL GENERAL
+======================================================= */
 
-html,
-body{
-    width:100%;
-    min-height:100%;
-}
+body {
 
-body{
-    background:#050505;
+    background:
+        radial-gradient(circle at top, #1f2f2d 0%, #111111 42%, #050505 100%);
 
-    min-height:100vh;
+    font-family: Arial, sans-serif;
 
-    display:flex;
-    justify-content:center;
-    align-items:center;
+    min-height: 100vh;
 
-    overflow:hidden;
+    display: flex;
 
-    font-family:Arial, sans-serif;
-}
+    justify-content: center;
 
+    align-items: center;
 
-/* ===== TELEFON DESKTOP - SE SCALEAZA DUPA MONITOR ===== */
+    padding: 24px;
 
-.phone-frame{
-
-    width:min(430px, 92vw);
-    height:min(820px, 92vh);
-
-    background:#000000;
-
-    border:2px solid #6d665d;
-
-    border-radius:38px;
-
-    box-shadow:0 0 40px rgba(0,0,0,0.8);
-
-    display:flex;
-    flex-direction:column;
-    justify-content:flex-start;
-    align-items:center;
-
-    padding:clamp(24px, 5vh, 42px) 24px;
-
-    overflow:hidden;
+    overflow: hidden;
 }
 
 
-/* ===== LOGO ===== */
+/* =======================================================
+   TELEFON PREMIUM DESKTOP - SE INCADREAZA DUPA MONITOR
+======================================================= */
 
-.logo{
+#app {
 
-    width:100%;
-    max-width:320px;
+    position: relative;
 
-    margin-top:clamp(10px, 3vh, 28px);
+    width: min(430px, 92vw);
 
-    object-fit:contain;
+    height: min(820px, 92vh);
+
+    background:
+        linear-gradient(180deg, #111111 0%, #050505 100%);
+
+    border-radius: 46px;
+
+    padding:
+        clamp(80px, 12vh, 115px)
+        28px
+        40px
+        28px;
+
+    border:
+        2px solid rgba(128, 118, 103, 0.95);
+
+    box-shadow:
+        0 0 0 3px rgba(255,255,255,0.04),
+        0 0 0 10px #000000,
+        0 35px 80px rgba(0,0,0,0.85);
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    overflow: hidden;
 }
 
 
-/* ===== SUBTITLU ===== */
+/* ===== CAMERA TELEFON ===== */
 
-.sub-title{
+#app::before {
 
-    margin-top:clamp(24px, 5vh, 42px);
+    content: "";
 
-    color:white;
+    position: absolute;
 
-    font-size:16px;
+    top: 22px;
 
-    opacity:0.75;
+    left: 50%;
 
-    text-align:center;
+    transform: translateX(-50%);
+
+    width: 165px;
+
+    height: 34px;
+
+    background: #000000;
+
+    border-radius: 30px;
 }
 
 
-/* ===== TELEFON REAL ===== */
+/* ===== SENZOR TELEFON ===== */
 
-@media(max-width:700px){
+#app::after {
 
-    body{
-        display:block;
-        overflow:hidden;
+    content: "";
+
+    position: absolute;
+
+    top: 36px;
+
+    left: 50%;
+
+    transform: translateX(-50%);
+
+    width: 58px;
+
+    height: 7px;
+
+    background: #202020;
+
+    border-radius: 20px;
+}
+
+
+/* =======================================================
+   LOGO PRINCIPAL
+======================================================= */
+
+.logo-principal {
+
+    display: block;
+
+    width: 100%;
+
+    max-width: 340px;
+
+    height: auto;
+
+    object-fit: contain;
+}
+
+
+/* =======================================================
+   TEXT STATUS
+======================================================= */
+
+.status-text {
+
+    margin-top: 36px;
+
+    color: #ffffff;
+
+    font-size: 16px;
+
+    opacity: 0.82;
+
+    text-align: center;
+}
+
+
+/* =======================================================
+   TELEFON REAL
+======================================================= */
+
+@media (max-width: 700px) {
+
+    body {
+
+        padding: 0;
+
+        align-items: flex-start;
+
+        overflow: hidden;
     }
 
-    .phone-frame{
+    #app {
 
-        width:100vw;
-        height:100vh;
+        width: 100vw;
 
-        border:none;
-        border-radius:0;
+        height: 100vh;
 
-        padding:30px 20px;
+        border-radius: 0;
+
+        border: none;
+
+        box-shadow: none;
+
+        padding:
+            42px
+            22px
+            35px
+            22px;
     }
 
-    .logo{
-        max-width:340px;
+    #app::before,
+    #app::after {
+
+        display: none;
     }
 
+    .logo-principal {
+
+        max-width: 360px;
+    }
+
+    .status-text {
+
+        font-size: 16px;
+    }
 }
