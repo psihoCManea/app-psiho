@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  <style>
+    /* ===== SETARI GENERALE PAGINA ===== */
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      min-height: 100%;
+      font-family: Arial, sans-serif;
+      background:
+        radial-gradient(circle at top center, rgba(170,120,20,0.75) 0%, rgba(40,28,8,0.95) 30%, #030303 72%),
+        linear-gradient(180deg, #080808 0%, #000 100%);
+      color: #fff;
+    }
+
+    body {
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .page {
+      min-height: 100vh;
+      padding: 12px 10px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* ===== HEADER PAGINA ===== */
+    .header {
+      position: relative;
+      text-align: center;
+      margin-bottom: 4px;
+      padding-top: 2px;
+    }
+
+    .back-btn {
+      position: absolute;
+      left: 0;
+      top: 2px;
+      color: #f2c94c;
+      font-size: 13px;
+      font-weight: 900;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .back-arrow {
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    .add-btn {
+      position: absolute;
+      right: 0;
+      top: -4px;
+      color: #f2c94c;
+      font-size: 34px;
+      font-weight: 300;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .title {
+      font-size: 28px;
+      font-weight: 900;
+      color: #f2c94c;
+    }
+
+    .subtitle {
+      margin-top: 6px;
+      font-size: 20px;
+      color: white;
+    }
+
+    /* ===== ECRANE INTERNE ===== */
+    .screen {
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    /* ===== CAUTARE CLIENT ===== */
+    .search-card {
+      border: 1px solid #f2c94c;
+      border-radius: 14px;
+      padding: 8px 10px;
+      background: rgba(12, 24, 38, 0.88);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .search-icon {
+      width: 28px;
+      height: 28px;
+      min-width: 28px;
+      border-radius: 50%;
+      border: 1px solid #f2c94c;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #f2c94c;
+      font-size: 15px;
+    }
+
+    .search-input {
+      width: 100%;
+      border: none;
+      outline: none;
+      background: transparent;
+      color: #fff;
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .search-input::placeholder {
+      color: rgba(255,255,255,0.55);
+    }
+
+    /* ===== LISTA CLIENTI ===== */
+    .client-list {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .client-card {
+      border: 1px solid #f2c94c;
+      border-radius: 14px;
+      padding: 6px 7px 6px 10px;
+      background: rgba(12, 24, 38, 0.88);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      cursor: pointer;
+    }
+
+    .client-text {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .client-name {
+      font-size: 14px;
+      font-weight: normal;
+      text-align: left;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .client-details {
+      margin-top: 2px;
+      font-size: 11px;
+      font-weight: normal;
+      color: #f2c94c;
+      text-align: left;
+    }
+
+    .arrow {
+      color: #f2c94c;
+      font-size: 22px;
+      font-weight: 300;
+      line-height: 1;
+    }
+
+    .empty-card {
+      border-radius: 16px;
+      padding: 14px;
+      background: rgba(12, 24, 38, 0.72);
+      text-align: center;
+      font-size: 14px;
+      color: rgba(255,255,255,0.75);
+    }
+
+    /* ===== DETALII CLIENT ===== */
+    .detail-card {
+      border: 1px solid #f2c94c;
+      border-radius: 14px;
+      padding: 12px;
+      background: rgba(12, 24, 38, 0.88);
+      text-align: center;
+    }
+
+    .detail-name {
+      font-size: 22px;
+      font-weight: 900;
+      color: #fff;
+      margin-bottom: 8px;
+      word-break: break-word;
+    }
+
+    .detail-info {
+      font-size: 14px;
+      color: #f2c94c;
+      margin-top: 5px;
+      word-break: break-word;
+    }
+
+    .detail-note {
+      margin-top: 10px;
+      font-size: 13px;
+      color: rgba(255,255,255,0.78);
+      word-break: break-word;
+    }
+
+    .action-list {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .action-btn {
+      width: 100%;
+      border: 1px solid #f2c94c;
+      border-radius: 14px;
+      padding: 11px 12px;
+      background: rgba(12, 24, 38, 0.88);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 900;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .action-btn.gold {
+      border: none;
+      background: linear-gradient(145deg, #f6d257, #a96f10);
+      color: #111;
+      text-align: center;
+    }
+
+    .action-btn.danger {
+      color: #ff4040;
+      border-color: rgba(255,64,64,0.75);
+      background: rgba(255,64,64,0.06);
+      text-align: center;
+    }
+
+    /* ===== FORMULAR CLIENT ===== */
+    .form-card {
+      border: 1px solid #f2c94c;
+      border-radius: 14px;
+      padding: 10px;
+      background: rgba(12, 24, 38, 0.88);
+    }
+
+    .form-title {
+      color: #f2c94c;
+      font-size: 16px;
+      font-weight: 900;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .field-label {
+      color: rgba(255,255,255,0.78);
+      font-size: 13px;
+      font-weight: 900;
+      margin: 10px 0 4px;
+    }
+
+    .field {
+      width: 100%;
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 12px;
+      background: rgba(5, 12, 20, 0.82);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 800;
+      padding: 10px 9px;
+      outline: none;
+    }
+
+    textarea.field {
+      min-height: 80px;
+      resize: none;
+    }
+
+    .save-btn {
+      width: 100%;
+      border: none;
+      border-radius: 14px;
+      padding: 12px 10px;
+      margin-top: 12px;
+      background: linear-gradient(145deg, #f6d257, #a96f10);
+      color: #111;
+      font-size: 15px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .delete-btn {
+      width: 100%;
+      border: 1px solid rgba(255,64,64,0.75);
+      border-radius: 14px;
+      padding: 11px 10px;
+      margin-top: 8px;
+      background: rgba(255,64,64,0.06);
+      color: #ff4040;
+      font-size: 15px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    /* ===== BARA JOS HOME ===== */
+    .bottom-bar {
+      margin-top: auto;
+      display: flex;
+    }
+
+    .box-btn {
+      flex: 1;
+      height: 45px;
+      border-radius: 14px;
+      background: linear-gradient(145deg, #f6d257, #a96f10);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: 900;
+      color: #111;
+      cursor: pointer;
+    }
+  
+/* ===== SIMULARE TELEFON DESKTOP ===== */
+@media (min-width: 701px) {
+
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 20px;
+  }
+
+  .page {
+    width: 430px;
+    min-height: calc(100vh - 40px);
+    background:
+      radial-gradient(circle at top center, rgba(170,120,20,0.75) 0%, rgba(40,28,8,0.95) 30%, #030303 72%),
+      linear-gradient(180deg, #080808 0%, #000 100%);
+    border: 2px solid rgba(255,255,255,0.18);
+    border-radius: 38px;
+    box-shadow:
+      0 0 0 8px rgba(255,255,255,0.04),
+      0 25px 70px rgba(0,0,0,0.65);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .page::before {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 110px;
+    height: 16px;
+    border-radius: 0 0 14px 14px;
+    background: rgba(0,0,0,0.9);
+    z-index: 20;
+  }
+
+  .page::after {
+    content: '';
+    position: absolute;
+    top: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 46px;
+    height: 4px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.18);
+    z-index: 21;
+  }
+}
+
+</style>
+
+  <!-- ===== SUPABASE - CONECTARE BAZĂ DE DATE ===== -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const supabaseClient = window.supabase.createClient(
+      'https://hnvqauxqxtdzgyqumkqa.supabase.co',
+      'sb_publishable_TDzH5gP2zi9jwmUVLlWrQA_p4TiPTZ_'
+    );
+  </script>
+
+</head>
+
+<body>
+  <div class="page">
+
+    <!-- ===== HEADER ===== -->
+    <div class="header">
+      <div class="back-btn" onclick="goBack()">
+        <span class="back-arrow">←</span>
+        <span>ÎNAPOI</span>
+      </div>
+
+      <div class="add-btn" onclick="openAdd()">+</div>
+
+      <div class="title">Clienți - <span id="totalClienti">0</span></div>
+      <div class="subtitle">Lista clienți</div>
+    </div>
+
+    <!-- ===== ECRAN LISTA CLIENTI ===== -->
+    <div id="screenList" class="screen active">
+      <div class="search-card">
+        <div class="search-icon">⌕</div>
+        <input id="searchInput" class="search-input" placeholder="Caută client..." oninput="renderClients()">
+      </div>
+
+      <div id="clientList" class="client-list"></div>
+    </div>
+
+    <!-- ===== ECRAN DETALII CLIENT ===== -->
+    <div id="screenDetails" class="screen">
+      <div class="detail-card">
+        <div class="detail-name" id="detailName"></div>
+        <div class="detail-info" id="detailPhone"></div>
+        <div class="detail-info" id="detailEmail"></div>
+        <div class="detail-info" id="detailBirthday"></div>
+        <div class="detail-info" id="detailNrProgramari"></div>
+        <div class="detail-note" id="detailNotes"></div>
+      </div>
+
+      <div class="action-list">
+        <button class="action-btn gold" onclick="openEdit()">EDITEAZĂ CLIENT</button>
+        <button class="action-btn" onclick="programClient()">Programează</button>
+        <button class="action-btn" onclick="clientHistory()">Istoric programări</button>
+        <button class="action-btn danger" onclick="deleteCurrentClient()">ȘTERGE CLIENT</button>
+      </div>
+    </div>
+
+    <!-- ===== ECRAN FORMULAR CLIENT ===== -->
+    <div id="screenForm" class="screen">
+      <div class="form-card">
+        <div class="form-title" id="formTitle">Adaugă client</div>
+
+        <div class="field-label">Nume complet</div>
+        <input id="formName" class="field" type="text" placeholder="Nume client">
+
+        <div class="field-label">Telefon</div>
+        <input id="formPhone" class="field" type="tel" placeholder="Telefon">
+
+        <div class="field-label">Email</div>
+        <input id="formEmail" class="field" type="email" placeholder="Email">
+
+        <div class="field-label">Data naștere</div>
+        <input id="formBirthday" class="field" type="date">
+
+        <div class="field-label">Notițe</div>
+        <textarea id="formNotes" class="field" placeholder="Observații client..."></textarea>
+
+        <div class="field-label">Număr programări</div>
+        <input id="formNrProgramari" class="field" type="number" min="0" value="0">
+
+        <button class="save-btn" onclick="saveClient()">SALVEAZĂ CLIENT</button>
+        <button id="formDeleteBtn" class="delete-btn" onclick="deleteCurrentClient()">ȘTERGE CLIENT</button>
+      </div>
+    </div>
+
+    <!-- ===== BUTON HOME JOS ===== -->
+    <div class="bottom-bar">
+      <div class="box-btn" onclick="goHome()">⌂ HOME</div>
+    </div>
+
+  </div>
+
+  <script>
+    /* ===== DATE GLOBALE ===== */
+    var clients = [];
+    var programariIstoric = [];
+    var currentClientId = null;
+    var formMode = "add";
+
+    /* ===== CURATARE TELEFON ===== */
+    function curataTelefon(telefon) {
+      return String(telefon || '').replace(/[^0-9]/g, '');
+    }
+
+    /* ===== INCARCARE CLIENTI SI ISTORIC DIN SUPABASE ===== */
+    async function loadClients() {
+      const box = document.getElementById('clientList');
+      box.innerHTML = '<div class="empty-card">Se încarcă...</div>';
+
+      const { data: clientiData, error: clientiError } = await supabaseClient
+        .from('clienti')
+        .select('*')
+        .order('nume', { ascending: true });
+
+      if (clientiError) {
+        console.log('EROARE CLIENTI SUPABASE:', clientiError);
+        box.innerHTML = '<div class="empty-card">Eroare la citirea clienților.</div>';
+        return;
+      }
+
+      const { data: programariData, error: programariError } = await supabaseClient
+        .from('programari')
+        .select('*');
+
+      if (programariError) {
+        console.log('EROARE ISTORIC PROGRAMARI SUPABASE:', programariError);
+        programariIstoric = [];
+      } else {
+        programariIstoric = programariData || [];
+      }
+
+      clients = (clientiData || []).map(function(c) {
+        return {
+          id: c.id,
+          nume: c.nume || '',
+          telefon: c.telefon || '',
+          email: c.email || '',
+          data_nastere: c.data_nastere || '',
+          notite: c.notite || '',
+          v2_trimisa: c.v2_trimisa === true,
+          nr_programari: calculeazaTotalProgramariClient(c.telefon)
+        };
+      });
+
+      renderClients();
+    }
+
+    /* ===== CALCUL PROGRAMARI REALIZATE CLIENT ===== */
+    function calculeazaTotalProgramariClient(telefonClient) {
+      var telClient = curataTelefon(telefonClient);
+
+      if (!telClient) return 0;
+
+      return programariIstoric.filter(function(p) {
+        if (curataTelefon(p.telefon) !== telClient) return false;
+        if (p.status === 'stearsa') return false;
+        if (!p.data || !p.ora_final) return false;
+
+        var finalProgramare = new Date(p.data + 'T' + p.ora_final + ':00');
+
+        return new Date() >= finalProgramare;
+      }).length;
+    }
+
+    /* ===== AFISARE ECRANE ===== */
+    function showScreen(id) {
+      document.querySelectorAll('.screen').forEach(function(screen) {
+        screen.classList.remove('active');
+      });
+
+      document.getElementById(id).classList.add('active');
+    }
+
+    /* ===== AFISARE LISTA CLIENTI ===== */
+    function renderClients() {
+      document.getElementById('totalClienti').innerText = clients.length;
+
+      var box = document.getElementById('clientList');
+      var q = document.getElementById('searchInput').value.toLowerCase().trim();
+
+      var filtered = clients
+        .filter(function(c) {
+          return String(c.nume || '').toLowerCase().indexOf(q) !== -1 ||
+                 String(c.telefon || '').toLowerCase().indexOf(q) !== -1;
+        })
+        .sort(function(a, b) {
+          return String(a.nume || '').localeCompare(String(b.nume || ''));
+        });
+
+      if (!filtered.length) {
+        box.innerHTML = '<div class="empty-card">Nu există clienți.</div>';
+        return;
+      }
+
+      box.innerHTML = filtered.map(function(c) {
+        return `
+          <div class="client-card" onclick="openDetails('${c.id}')">
+            <div class="client-text">
+              <div class="client-name">${escapeHtml(c.nume)}</div>
+              <div class="client-details">${escapeHtml(c.telefon)} · Programări: ${Number(c.nr_programari || 0)}</div>
+            </div>
+            ${c.v2_trimisa !== true ? `<button onclick="trimiteV2(event, '${c.id}')" style="background:#d71920;color:#fff;font-size:10px;border:none;border-radius:8px;padding:4px 6px;margin-right:4px;cursor:pointer;">V2</button>` : ``}
+            <div class="arrow">›</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    /* ===== DETALII CLIENT ===== */
+    function openDetails(id) {
+      currentClientId = id;
+
+      var c = clients.find(function(x) {
+        return String(x.id) === String(id);
+      });
+
+      if (!c) return;
+
+      document.getElementById('detailName').textContent = c.nume || '-';
+      document.getElementById('detailPhone').textContent = c.telefon ? 'Telefon: ' + c.telefon : 'Telefon: -';
+      document.getElementById('detailEmail').textContent = c.email ? 'Email: ' + c.email : 'Email: -';
+      document.getElementById('detailBirthday').textContent = c.data_nastere ? 'Data naștere: ' + c.data_nastere : 'Data naștere: -';
+      document.getElementById('detailNrProgramari').textContent = 'Programări realizate: ' + Number(c.nr_programari || 0);
+      document.getElementById('detailNotes').textContent = c.notite ? c.notite : '';
+
+      showScreen('screenDetails');
+    }
+
+    /* ===== ADAUGARE CLIENT ===== */
+    function openAdd() {
+      formMode = 'add';
+      currentClientId = null;
+
+      document.getElementById('formTitle').textContent = 'Adaugă client';
+      document.getElementById('formName').value = '';
+      document.getElementById('formPhone').value = '';
+      document.getElementById('formEmail').value = '';
+      document.getElementById('formBirthday').value = '';
+      document.getElementById('formNotes').value = '';
+      document.getElementById('formNrProgramari').value = 0;
+      document.getElementById('formNrProgramari').disabled = true;
+      document.getElementById('formDeleteBtn').style.display = 'none';
+
+      showScreen('screenForm');
+    }
+
+    /* ===== EDITARE CLIENT ===== */
+    function openEdit() {
+      var c = clients.find(function(x) {
+        return String(x.id) === String(currentClientId);
+      });
+
+      if (!c) return;
+
+      formMode = 'edit';
+
+      document.getElementById('formTitle').textContent = 'Editează client';
+      document.getElementById('formName').value = c.nume || '';
+      document.getElementById('formPhone').value = c.telefon || '';
+      document.getElementById('formEmail').value = c.email || '';
+      document.getElementById('formBirthday').value = c.data_nastere || '';
+      document.getElementById('formNotes').value = c.notite || '';
+      document.getElementById('formNrProgramari').value = Number(c.nr_programari || 0);
+      document.getElementById('formNrProgramari').disabled = true;
+      document.getElementById('formDeleteBtn').style.display = 'block';
+
+      showScreen('screenForm');
+    }
+
+    /* ===== SALVARE CLIENT IN SUPABASE ===== */
+    async function saveClient() {
+      var nume = document.getElementById('formName').value.trim();
+      var telefon = document.getElementById('formPhone').value.trim();
+      var email = document.getElementById('formEmail').value.trim();
+      var dataNastere = document.getElementById('formBirthday').value || null;
+      var notite = document.getElementById('formNotes').value.trim();
+
+      if (!nume) {
+        alert('Completează numele clientului.');
+        return;
+      }
+
+      if (!telefon) {
+        alert('Completează telefonul clientului.');
+        return;
+      }
+
+      if (formMode === 'add') {
+        const { data, error } = await supabaseClient
+          .from('clienti')
+          .insert([{
+            nume: nume,
+            telefon: telefon,
+            email: email,
+            data_nastere: dataNastere,
+            notite: notite
+          }])
+          .select()
+          .single();
+
+        if (error) {
+          console.log('EROARE ADAUGARE CLIENT:', error);
+          alert('Eroare la salvarea clientului.');
+          return;
+        }
+
+        currentClientId = data.id;
+      } else {
+        const { error } = await supabaseClient
+          .from('clienti')
+          .update({
+            nume: nume,
+            telefon: telefon,
+            email: email,
+            data_nastere: dataNastere,
+            notite: notite
+          })
+          .eq('id', currentClientId);
+
+        if (error) {
+          console.log('EROARE EDITARE CLIENT:', error);
+          alert('Eroare la salvarea clientului.');
+          return;
+        }
+      }
+
+      await loadClients();
+      openDetails(currentClientId);
+    }
+
+    /* ===== STERGERE CLIENT DIN SUPABASE ===== */
+    async function deleteCurrentClient() {
+      if (!currentClientId) return;
+
+      var c = clients.find(function(x) {
+        return String(x.id) === String(currentClientId);
+      });
+
+      if (!c) return;
+
+      if (!confirm('Ștergi clientul ' + c.nume + '?')) return;
+
+      const { error } = await supabaseClient
+        .from('clienti')
+        .delete()
+        .eq('id', currentClientId);
+
+      if (error) {
+        console.log('EROARE STERGERE CLIENT:', error);
+        alert('Eroare la ștergerea clientului.');
+        return;
+      }
+
+      currentClientId = null;
+      await loadClients();
+      showScreen('screenList');
+    }
+
+    /* ===== TRIMITERE MESAJ V2 WHATSAPP ===== */
+    async function trimiteV2(event, id) {
+      event.stopPropagation();
+
+      var c = clients.find(function(x) {
+        return String(x.id) === String(id);
+      });
+
+      if (!c || !c.telefon) return;
+
+      var telefon = curataTelefon(c.telefon);
+      if (telefon.startsWith('0')) {
+        telefon = '40' + telefon.substring(1);
+      }
+
+      var mesaj = `Salut,
+Din dorinta de a fi cat mai profesionist, am dezvoltat o aplicatie pentru programari.
+Te rog sa accesezi linkul de mai jos ( click pe el ), cand se deschide sa apesi pe cele 3 puncte de sus si sa descarci aplicatia (Adauga pe ecran pornire).
+In aplicatie vei vedea disponibilitatile pe 7 zile.
+In curand vei putea sa imi trimiti o pre-programare direct din aplicatie, eu o vad, o validez si iti trimit confirmarea pe whatsapp.
+https://mihaiflorescu2017-droid.github.io/barber-app/haircraft-clienti/
+Multumesc`;
+
+      const { error } = await supabaseClient
+        .from('clienti')
+        .update({ v2_trimisa: true })
+        .eq('id', id);
+
+      if (error) {
+        console.log('EROARE V2 SUPABASE:', error);
+        return;
+      }
+
+      await loadClients();
+
+      window.open('https://wa.me/' + telefon + '?text=' + encodeURIComponent(mesaj), '_blank');
+    }
+
+    /* ===== ACTIUNI VIITOARE ===== */
+    function programClient() {
+      alert('Aici se va lega cu pagina Programare nouă.');
+    }
+
+    function clientHistory() {
+      alert('Istoricul va fi legat separat de programări.');
+    }
+
+    /* ===== NAVIGARE ===== */
+    function goBack() {
+      var detailsActive = document.getElementById('screenDetails').classList.contains('active');
+      var formActive = document.getElementById('screenForm').classList.contains('active');
+
+      if (detailsActive) {
+        showScreen('screenList');
+        return;
+      }
+
+      if (formActive) {
+        if (formMode === 'edit' && currentClientId) {
+          openDetails(currentClientId);
+        } else {
+          showScreen('screenList');
+        }
+        return;
+      }
+
+      goHome();
+    }
+
+    function goHome() {
+      window.location.href = 'index_premium.html';
+    }
+
+    /* ===== PROTECTIE TEXT ===== */
+    function escapeHtml(text) {
+      return String(text || '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    /* ===== PORNIRE PAGINA ===== */
+    loadClients();
+  </script>
+</body>
+</html>

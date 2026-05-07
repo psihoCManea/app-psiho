@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <!-- BLOC 1 - SETĂRI PAGINĂ -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Orar</title>
+
+  <!-- BLOC 2 - STIL GENERAL -->
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      min-height: 100%;
+      font-family: Arial, sans-serif;
+      background:
+        radial-gradient(circle at top center, rgba(170,120,20,0.75) 0%, rgba(40,28,8,0.95) 30%, #030303 72%),
+        linear-gradient(180deg, #080808 0%, #000 100%);
+      color: #fff;
+      overflow-x: hidden;
+    }
+
+    body {
+      min-height: 100vh;
+    }
+
+    /* BLOC 3 - PAGINA */
+    .page {
+      min-height: 100vh;
+      padding: 10px 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    /* BLOC 4 - HEADER */
+    .header {
+      position: relative;
+      min-height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .home-btn {
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 27px;
+      padding: 0 7px;
+      border-radius: 12px;
+      border: none;
+      background: linear-gradient(145deg, #f6d257, #a96f10);
+      color: #111;
+      font-size: 11px;
+      font-weight: 900;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .title {
+      font-size: 22px;
+      line-height: 1;
+      font-weight: 900;
+      color: #f2c94c;
+      text-align: center;
+    }
+
+    .subtitle {
+      font-size: 11px;
+      color: rgba(255,255,255,0.75);
+      text-align: center;
+      margin-top: -6px;
+    }
+
+    /* BLOC 5 - TABEL ORAR */
+    .orar-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      overflow-y: visible;
+      border: 1px solid #f2c94c;
+      border-radius: 14px;
+      background: rgba(12, 24, 38, 0.88);
+      box-shadow: 0 10px 24px rgba(0,0,0,0.42);
+    }
+
+    .orar-grid {
+      display: grid;
+      grid-template-columns: 74px repeat(7, 76px);
+      min-width: 606px;
+    }
+
+    .cell {
+      min-height: 25px;
+      padding: 3px 2px;
+      border-right: 1px solid rgba(242,201,76,0.35);
+      border-bottom: 1px solid rgba(242,201,76,0.28);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: 10px;
+      font-weight: 900;
+      color: #111;
+      line-height: 1.05;
+    }
+
+    .hour-cell {
+      position: sticky;
+      left: 0;
+      z-index: 3;
+      background: linear-gradient(145deg, #f6d257, #a96f10);
+      color: #111;
+      font-size: 9.5px;
+      font-weight: 900;
+    }
+
+    .head-cell {
+      position: sticky;
+      border-bottom: 2px solid black;
+      top: 0;
+      z-index: 2;
+      min-height: 30px;
+      background: linear-gradient(145deg, #f6d257, #a96f10);
+      color: #111;
+      font-size: 10px;
+      font-weight: 900;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .head-cell.hour-cell {
+      z-index: 4;
+    }
+
+    .day-name {
+      font-size: 11px;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .day-date {
+      font-size: 9px;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .free {
+      background: linear-gradient(145deg, #f6d257, #a96f10);
+      color: #111;
+    }
+
+    .busy {
+      background: rgba(0, 0, 0, 0.5);
+      color: #f2c94c;
+    }
+
+    .busy-past {
+      background: rgba(128, 128, 128, 0.3);
+      color: #f2c94c;
+    }
+
+    .legend {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      align-items: center;
+      font-size: 11px;
+      font-weight: 900;
+      color: #fff;
+      margin-top: 1px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .legend-box {
+      width: 13px;
+      height: 13px;
+      border-radius: 4px;
+      border: 1px solid rgba(255,255,255,0.35);
+    }
+
+    .legend-box.free-box {
+      background: #D5F0C0;
+    }
+
+    .legend-box.busy-box {
+      background: #FF6B6B;
+    }
+  
+    /* SEPARATOR COLOANA 1 */
+    .col-sep {
+      box-shadow: inset -2px 0 0 #000 !important;
+      z-index: 5;
+    }
+
+    /* BLOC DESKTOP - SIMULARE TELEFON */
+    @media (min-width: 701px) {
+
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 20px;
+      }
+
+      .page {
+        width: 430px;
+        min-height: calc(100vh - 40px);
+        background:
+          radial-gradient(circle at top center, rgba(170,120,20,0.75) 0%, rgba(40,28,8,0.95) 30%, #030303 72%),
+          linear-gradient(180deg, #080808 0%, #000 100%);
+        border: 2px solid rgba(255,255,255,0.18);
+        border-radius: 38px;
+        box-shadow:
+          0 0 0 8px rgba(255,255,255,0.04),
+          0 25px 70px rgba(0,0,0,0.65);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .page::before {
+        content: '';
+        position: absolute;
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 110px;
+        height: 16px;
+        border-radius: 0 0 14px 14px;
+        background: rgba(0,0,0,0.9);
+        z-index: 20;
+      }
+
+      .page::after {
+        content: '';
+        position: absolute;
+        top: 15px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 46px;
+        height: 4px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.18);
+        z-index: 21;
+      }
+    }
+
+
+  </style>
+
+  <!-- BLOC SUPABASE - CONECTARE BAZĂ DE DATE -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    const supabaseClient = window.supabase.createClient(
+      'https://hnvqauxqxtdzgyqumkqa.supabase.co',
+      'sb_publishable_TDzH5gP2zi9jwmUVLlWrQA_p4TiPTZ_'
+    );
+  </script>
+
+</head>
+
+<body>
+  <!-- BLOC HTML 1 - PAGINA ORAR -->
+  <div class="page">
+
+    <!-- BLOC HTML 2 - HEADER -->
+    <div class="header">
+      <button class="home-btn" onclick="goHome()">⌂ HOME</button>
+      <div class="title">Orar</div>
+    </div>
+
+    <div class="subtitle">Trage tabelul dreapta - stânga pentru toate cele 7 zile</div>
+
+    <!-- BLOC HTML 3 - TABEL -->
+    <div class="orar-wrapper">
+      <div id="orarGrid" class="orar-grid"></div>
+    </div>
+
+
+  </div>
+
+  <script>
+    /* BLOC 6 - SETĂRI ORAR */
+    const ORA_START = 8;
+    const ORA_FINAL = 22;
+    const DURATA_SLOT = 30;
+
+    const ZILE_SCURT = ['Du', 'Lu', 'Ma', 'Mi', 'Jo', 'Vi', 'Sa'];
+    const LUNI = ['ian', 'feb', 'mar', 'apr', 'mai', 'iun', 'iul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+
+    /* BLOC 7 - HOME */
+    function goHome() {
+      window.location.href = 'index_premium.html';
+    }
+
+    /* BLOC 8 - DATA ZILELOR */
+    function getDateIso(offset) {
+      const d = new Date();
+      d.setDate(d.getDate() + offset);
+      return new Date(d.getFullYear(), d.getMonth(), d.getDate()).toLocaleDateString('en-CA');
+    }
+
+    function getDays() {
+      const zile = [];
+
+      for (let i = 0; i < 7; i++) {
+        const d = new Date();
+        d.setDate(d.getDate() + i);
+
+        zile.push({
+          dataIso: getDateIso(i),
+          ziScurt: ZILE_SCURT[d.getDay()],
+          dataText: d.getDate() + ' ' + LUNI[d.getMonth()]
+        });
+      }
+
+      return zile;
+    }
+
+    /* BLOC 9 - INTERVALE ORARE */
+    function pad(num) {
+      return String(num).padStart(2, '0');
+    }
+
+    function minuteToText(totalMinute) {
+      const h = Math.floor(totalMinute / 60);
+      const m = totalMinute % 60;
+      return pad(h) + ':' + pad(m);
+    }
+
+    function getSlots() {
+      const slots = [];
+      const start = ORA_START * 60;
+      const end = ORA_FINAL * 60;
+
+      for (let t = start; t < end; t += DURATA_SLOT) {
+        slots.push({
+          startMinute: t,
+          endMinute: t + DURATA_SLOT,
+          text: minuteToText(t) + '-' + minuteToText(t + DURATA_SLOT)
+        });
+      }
+
+      return slots;
+    }
+
+    /* BLOC 10 - CITIRE PROGRAMĂRI ȘI INDISPONIBILITĂȚI DIN SUPABASE */
+    async function getProgramari() {
+      try {
+        let rezultat = [];
+
+        const { data, error } = await supabaseClient
+          .from('programari')
+          .select('*')
+          .neq('status', 'stearsa');
+
+        if (error) {
+          console.log('EROARE SUPABASE ORAR:', error);
+        } else {
+          rezultat = rezultat.concat((data || []).map(function(p) {
+            return {
+              zi: {
+                dataIso: p.data
+              },
+              interval: p.ora_start + '-' + p.ora_final,
+              oraStart: p.ora_start,
+              text: 'Ocupat'
+            };
+          }));
+        }
+
+        const { data: indisponibilitati, error: errorIndisponibilitati } = await supabaseClient
+          .from('indisponibilitati')
+          .select('tip, data_start, data_final, ora_start, ora_final, mesaj, activa')
+          .eq('activa', true);
+
+        if (errorIndisponibilitati) {
+          console.log('EROARE SUPABASE INDISPONIBILITATI ORAR:', errorIndisponibilitati);
+        } else {
+          (indisponibilitati || []).forEach(function(blocare) {
+            if (!blocare || !blocare.data_start || !blocare.data_final) return;
+
+            if (blocare.tip === 'interval') {
+              rezultat.push({
+                zi: {
+                  dataIso: blocare.data_start
+                },
+                interval: blocare.ora_start + '-' + blocare.ora_final,
+                text: blocare.mesaj || 'Închis'
+              });
+            }
+
+            if (blocare.tip === 'zi') {
+              rezultat.push({
+                zi: {
+                  dataIso: blocare.data_start
+                },
+                interval: '08:00-22:00',
+                text: blocare.mesaj || 'Închis'
+              });
+            }
+
+            if (blocare.tip === 'concediu') {
+              const start = new Date(blocare.data_start);
+              const final = new Date(blocare.data_final);
+
+              for (let d = new Date(start); d <= final; d.setDate(d.getDate() + 1)) {
+                const iso = new Date(d.getFullYear(), d.getMonth(), d.getDate()).toLocaleDateString('en-CA');
+
+                rezultat.push({
+                  zi: {
+                    dataIso: iso
+                  },
+                  interval: '08:00-22:00',
+                  text: blocare.mesaj || 'Concediu'
+                });
+              }
+            }
+          });
+        }
+
+        return rezultat;
+      } catch(e) {
+        console.log('EROARE SUPABASE ORAR:', e);
+        return [];
+      }
+    }
+
+    function intervalToMinutes(interval) {
+      if (!interval || interval.indexOf('-') === -1) return null;
+
+      const parti = interval.split('-');
+      const start = parti[0].trim().split(':');
+      const end = parti[1].trim().split(':');
+
+      if (start.length < 2 || end.length < 2) return null;
+
+      return {
+        startMinute: Number(start[0]) * 60 + Number(start[1]),
+        endMinute: Number(end[0]) * 60 + Number(end[1])
+      };
+    }
+
+    /* BLOC 11 - VERIFICARE OCUPAT / LIBER */
+    function getBlocarePentruSlot(dataIso, slot, programari) {
+      return programari.find(function(p) {
+        if (!p || !p.zi || !p.zi.dataIso || !p.interval) return false;
+        if (p.zi.dataIso !== dataIso) return false;
+
+        const interval = intervalToMinutes(p.interval);
+        if (!interval) return false;
+
+        return slot.startMinute < interval.endMinute && slot.endMinute > interval.startMinute;
+      });
+    }
+
+    function esteProgramareInceputa(dataIso, blocare) {
+      if (!blocare || blocare.text !== 'Ocupat' || !blocare.oraStart) return false;
+
+      const acum = new Date();
+      const aziIso = new Date(acum.getFullYear(), acum.getMonth(), acum.getDate()).toLocaleDateString('en-CA');
+
+      if (dataIso !== aziIso) return false;
+
+      const partiOra = blocare.oraStart.split(':');
+      if (partiOra.length < 2) return false;
+
+      const dataInceput = new Date(dataIso);
+      dataInceput.setHours(Number(partiOra[0]), Number(partiOra[1]), 0, 0);
+
+      return acum > dataInceput;
+    }
+
+    /* BLOC 12 - AFIȘARE TABEL */
+    async function renderOrar() {
+      const grid = document.getElementById('orarGrid');
+      const zile = getDays();
+      const slots = getSlots();
+      const programari = await getProgramari();
+
+      let html = '';
+
+      html += '<div class="cell head-cell hour-cell col-sep">Ora</div>';
+
+      zile.forEach(function(zi) {
+        html += `
+          <div class="cell head-cell">
+            <div class="day-name">${zi.ziScurt}</div>
+            <div class="day-date">${zi.dataText}</div>
+          </div>
+        `;
+      });
+
+      slots.forEach(function(slot) {
+        html += `<div class="cell hour-cell col-sep">${slot.text}</div>`;
+
+        zile.forEach(function(zi) {
+          const blocare = getBlocarePentruSlot(zi.dataIso, slot, programari);
+          const ocupat = !!blocare;
+          const programareInceputa = ocupat && esteProgramareInceputa(zi.dataIso, blocare);
+          const clasaCelula = ocupat ? (programareInceputa ? 'busy-past' : 'busy') : 'free';
+          html += `<div class="cell ${clasaCelula}">${ocupat ? (blocare.text || 'Ocupat') : 'Liber'}</div>`;
+        });
+      });
+
+      grid.innerHTML = html;
+    }
+
+    renderOrar();
+  </script>
+</body>
+</html>
