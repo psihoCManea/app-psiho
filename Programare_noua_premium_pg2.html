@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      min-height: 100%;
+      font-family: Arial, sans-serif;
+      background:
+        radial-gradient(circle at top center, rgba(170,120,20,0.75) 0%, rgba(40,28,8,0.95) 30%, #030303 72%),
+        linear-gradient(180deg, #080808 0%, #000 100%);
+      color: #fff;
+    }
+
+    body {
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .page {
+      min-height: 100vh;
+      padding: 28px 26px 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 35px;
+    }
+
+    .title {
+      font-size: 42px;
+      font-weight: 900;
+      color: #f2c94c;
+    }
+
+    .subtitle {
+      margin-top: 20px;
+      font-size: 50px;
+      color: white;
+      font-weight: normal;
+    }
+
+    .nav-back {
+      position:absolute;
+      left:0;
+      top:-10px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      cursor:pointer;
+    }
+
+    .arrow {
+      font-size:90px;
+      font-weight:900;
+      color:#f2c94c;
+    }
+
+    .back-text {
+      color:red;
+      font-size:35px;
+      font-weight:900;
+      margin-top:22px;
+    }
+
+    .steps {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 30px 0;
+    }
+
+    .step {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      border: 3px solid #d4af37;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 30px;
+      font-weight: bold;
+      color: #f5d37a;
+    }
+
+    .step.active {
+      background: #f2c94c;
+      color: #000;
+    }
+
+    .line {
+      width: 45px;
+      height: 3px;
+      background: #d4af37;
+    }
+
+    .client-card {
+      border: 1.5px solid rgba(222, 166, 74, 0.55);
+      border-radius: 18px;
+      padding: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(12, 24, 38, 0.82);
+      box-shadow: 0 16px 35px rgba(0,0,0,0.25);
+    }
+
+    .client-left {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      min-width: 0;
+    }
+
+    .avatar {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      border: 2px solid rgba(237, 188, 95, 0.65);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 38px;
+      color: #f4c363;
+      flex-shrink: 0;
+    }
+
+    .label {
+      color: #f4c363;
+      font-size: 17px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+
+    .client-name {
+      margin-top: 6px;
+      font-size: 30px;
+      font-weight: 800;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .phone {
+      font-size: 22px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      white-space: nowrap;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-top: 2px;
+    }
+
+    .clock-small {
+      width: 48px;
+      height: 48px;
+      border: 3px solid #f4c363;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #f4c363;
+      font-size: 25px;
+      flex-shrink: 0;
+    }
+
+    .section-title h2 {
+      margin: 0;
+      font-size: 27px;
+      line-height: 1.1;
+    }
+
+    .section-title p {
+      margin: 8px 0 0;
+      font-size: 18px;
+      color: rgba(255,255,255,0.65);
+    }
+
+    .duration-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      flex: 1;
+    }
+
+    .duration-card {
+      position: relative;
+      min-height: 178px;
+      border-radius: 24px;
+      border: 1.5px solid rgba(255,255,255,0.18);
+      background:
+        radial-gradient(circle at top left, rgba(255,255,255,0.08), transparent 35%),
+        rgba(10, 22, 36, 0.86);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      cursor: pointer;
+      box-shadow: 0 14px 34px rgba(0,0,0,0.25);
+      transition: 0.18s ease;
+    }
+
+    .duration-card.selected {
+      border: 2.5px solid #f4c363;
+      background:
+        radial-gradient(circle at top left, rgba(255, 218, 137, 0.14), transparent 40%),
+        linear-gradient(145deg, rgba(36,48,50,0.95), rgba(8,20,33,0.95));
+      box-shadow: 0 0 0 1px rgba(244,195,99,0.18), 0 18px 42px rgba(0,0,0,0.35);
+    }
+
+    .check {
+      display: none;
+      position: absolute;
+      right: 22px;
+      top: 22px;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ffe28a, #d9972f);
+      color: #06111c;
+      font-size: 30px;
+      font-weight: 900;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .duration-card.selected .check {
+      display: flex;
+    }
+
+    .duration-icon {
+      font-size: 65px;
+      color: #f4c363;
+      margin-bottom: 18px;
+    }
+
+    .duration-main {
+      font-size: 46px;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+    }
+
+    .duration-sub {
+      margin-top: 8px;
+      font-size: 25px;
+      color: rgba(255,255,255,0.68);
+      font-weight: 600;
+    }
+
+    .selected-box {
+      border: 1.5px solid rgba(255,255,255,0.16);
+      border-radius: 22px;
+      padding: 20px 26px;
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      background: rgba(10, 22, 36, 0.88);
+      box-shadow: 0 14px 32px rgba(0,0,0,0.22);
+    }
+
+     .calendar-icon {
+     width: 66px;
+     height: 66px;
+     border-radius: 50%;
+     border: 3px solid #f4c363;
+     display: flex;
+     align-items: center;
+     justify-content: center;
+     font-size: 34px;
+     color: #f4c363;
+     flex-shrink: 0;
+    }
+
+    .selected-label {
+      font-size: 36px;
+      color: rgba(255,255,255,0.65);
+      margin-bottom: 5px;
+    }
+
+    .selected-value {
+      font-size: 62px;
+      font-weight: 900;
+      color: #ffe28a;
+    }
+
+    .bottom-bar {
+      margin-top:auto;
+      display:flex;
+      justify-content:space-between;
+      gap:20px;
+    }
+
+    .box-btn {
+      flex:1;
+      height:110px;
+      border-radius:24px;
+      background: linear-gradient(145deg, #f6d257, #a96f10);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:36px;
+      font-weight:900;
+      color:#111;
+      cursor:pointer;
+    }
+
+    @media (max-width: 520px) {
+      .page {
+        padding: 22px 16px 18px;
+        gap: 18px;
+      }
+
+      .title {
+        font-size: 42px;
+      }
+
+      .subtitle {
+        font-size: 50px;
+      }
+
+      .client-card {
+        padding: 18px;
+      }
+
+      .avatar {
+        width: 58px;
+        height: 58px;
+        font-size: 32px;
+      }
+
+      .client-name {
+        font-size: 24px;
+      }
+
+      .phone {
+        display: none;
+      }
+
+      .duration-card {
+        min-height: 150px;
+      }
+
+      .duration-main {
+        font-size: 31px;
+      }
+
+      .duration-sub {
+        font-size: 18px;
+      }
+
+      .duration-icon {
+        font-size: 46px;
+        margin-bottom: 12px;
+      }
+
+
+    }
+  
+    /* =========================================================
+       FIX GITHUB PWA TELEFON
+       Micșorează pagina pentru ecran de telefon în aplicația instalată.
+    ========================================================= */
+    @media (max-width: 520px) {
+      html, body {
+        width: 100%;
+        min-height: 100%;
+        overflow-x: hidden;
+      }
+
+      .page {
+        min-height: 100svh;
+        padding: 12px 10px 12px;
+        gap: 10px;
+      }
+
+      .header {
+        margin-bottom: 10px;
+        padding-top: 4px;
+      }
+
+      .title {
+        font-size: 24px !important;
+      }
+
+      .subtitle {
+        margin-top: 6px;
+        font-size: 22px !important;
+      }
+
+      .nav-back {
+        left: 0;
+        top: -4px;
+        gap: 3px;
+      }
+
+      .arrow {
+        font-size: 42px !important;
+      }
+
+      .back-text {
+        font-size: 14px !important;
+        margin-top: 10px;
+      }
+
+      .steps {
+        margin: 8px 0 10px;
+      }
+
+      .step {
+        width: 34px;
+        height: 34px;
+        font-size: 16px;
+        border-width: 2px;
+      }
+
+      .line {
+        width: 22px;
+        height: 2px;
+      }
+
+      .bottom-bar {
+        gap: 10px;
+      }
+
+      .box-btn {
+        height: 56px;
+        border-radius: 14px;
+        font-size: 20px;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .client-card {
+        padding: 12px;
+        border-radius: 14px;
+      }
+
+      .avatar {
+        width: 42px;
+        height: 42px;
+        font-size: 24px;
+      }
+
+      .label {
+        font-size: 12px;
+      }
+
+      .client-name {
+        font-size: 19px;
+      }
+
+      .phone {
+        display: none;
+      }
+
+      .section-title h2 {
+        font-size: 19px;
+      }
+
+      .clock-small {
+        width: 34px;
+        height: 34px;
+        font-size: 18px;
+      }
+
+      .duration-grid {
+        gap: 10px;
+      }
+
+      .duration-card {
+        min-height: 104px;
+        border-radius: 16px;
+      }
+
+      .duration-icon {
+        font-size: 32px;
+        margin-bottom: 6px;
+      }
+
+      .duration-main {
+        font-size: 22px;
+      }
+
+      .duration-sub {
+        font-size: 14px;
+      }
+
+      .check {
+        width: 28px;
+        height: 28px;
+        right: 10px;
+        top: 10px;
+        font-size: 20px;
+      }
+
+      .selected-box {
+        padding: 12px;
+        border-radius: 14px;
+        gap: 10px;
+      }
+
+      .calendar-icon {
+        width: 42px;
+        height: 42px;
+        font-size: 22px;
+      }
+
+      .selected-label {
+        font-size: 16px;
+      }
+
+      .selected-value {
+        font-size: 26px;
+      }
+    }
+
+  
+/* ===== SIMULARE TELEFON DESKTOP ===== */
+@media (min-width: 701px) {
+
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+    overflow: hidden;
+  }
+
+  .page {
+    width: min(430px, 92vw);
+    height: min(860px, 92vh);
+    min-height: 0;
+    background:
+      radial-gradient(circle at top center, rgba(170,120,20,0.75) 0%, rgba(40,28,8,0.95) 30%, #030303 72%),
+      linear-gradient(180deg, #080808 0%, #000 100%);
+    border: 2px solid rgba(255,255,255,0.18);
+    border-radius: 38px;
+    box-shadow:
+      0 0 0 8px rgba(255,255,255,0.04),
+      0 25px 70px rgba(0,0,0,0.65);
+    position: relative;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .page::before {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 110px;
+    height: 16px;
+    border-radius: 0 0 14px 14px;
+    background: rgba(0,0,0,0.9);
+    z-index: 20;
+  }
+
+  .page::after {
+    content: '';
+    position: absolute;
+    top: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 46px;
+    height: 4px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.18);
+    z-index: 21;
+  }
+}
+
+</style>
+</head>
+
+<body>
+  <div class="page">
+
+    <div class="header" style="position:relative;">
+      <div class="nav-back" onclick="goBack()">
+        <div class="arrow">«</div>
+        <div class="back-text">BACK</div>
+      </div>
+      <div class="title">Programare nouă</div>
+      <div class="subtitle">Alege durata</div>
+    </div>
+
+    <div class="steps">
+      <div class="step">1</div>
+      <div class="line"></div>
+      <div class="step active">2</div>
+      <div class="line"></div>
+      <div class="step">3</div>
+      <div class="line"></div>
+      <div class="step">4</div>
+    </div>
+
+    <div class="client-card">
+      <div class="client-left">
+        <div class="avatar">👤</div>
+        <div>
+          <div class="label">CLIENT SELECTAT</div>
+          <div class="client-name" id="clientName">Ionuț Popescu</div>
+        </div>
+      </div>
+      <div class="phone">☎ <span id="clientPhone">+40 712 345 678</span></div>
+    </div>
+
+    <div class="section-title">
+      <div class="clock-small">⏱</div>
+      <div>
+        <h2>Alege durata programării</h2>
+        </div>
+    </div>
+
+    <div class="duration-grid">
+      <div class="duration-card" onclick="selectDuration(30, this)">
+        <div class="check">✓</div>
+        <div class="duration-icon">⏱</div>
+        <div class="duration-main">30 MIN</div>
+        <div class="duration-sub">Rapid</div>
+      </div>
+
+      <div class="duration-card selected" onclick="selectDuration(60, this)">
+        <div class="check">✓</div>
+        <div class="duration-icon">⏱</div>
+        <div class="duration-main">60 MIN</div>
+        <div class="duration-sub">Standard</div>
+      </div>
+
+      <div class="duration-card" onclick="selectDuration(90, this)">
+        <div class="check">✓</div>
+        <div class="duration-icon">⏱</div>
+        <div class="duration-main">90 MIN</div>
+        <div class="duration-sub">Complex</div>
+      </div>
+
+      <div class="duration-card" onclick="selectDuration(120, this)">
+        <div class="check">✓</div>
+        <div class="duration-icon">⏱</div>
+        <div class="duration-main">120 MIN</div>
+        <div class="duration-sub">Complet</div>
+      </div>
+    </div>
+
+    <div class="selected-box">
+      <div class="calendar-icon">⏱</div>
+      <div>
+        <div class="selected-label">Durata selectată</div>
+        <div class="selected-value" id="selectedDuration">60 minute</div>
+      </div>
+    </div>
+
+    <div class="bottom-bar">
+      <div class="box-btn" onclick="goHome()">⌂ HOME</div>
+      <div class="box-btn" onclick="nextStep()">NEXT</div>
+    </div>
+
+  </div>
+
+  <script>
+    let durataSelectata = 60;
+    let client = null;
+
+    function selectDuration(minutes, element) {
+      durataSelectata = minutes;
+
+      document.querySelectorAll('.duration-card').forEach(card => {
+        card.classList.remove('selected');
+      });
+
+      element.classList.add('selected');
+      document.getElementById('selectedDuration').textContent = minutes + ' minute';
+      localStorage.setItem('programare_durata', String(minutes));
+
+    }
+
+    function speakDuration(minutes) {
+      try {
+        const msg = new SpeechSynthesisUtterance(minutes + ' minute');
+        msg.lang = 'ro-RO';
+        msg.rate = 0.95;
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.speak(msg);
+      } catch (e) {}
+    }
+
+    function init() {
+      try { client = JSON.parse(localStorage.getItem('programare_client') || 'null'); } catch(e) {}
+      if (!client) {
+        location.href = 'Programare_noua_premium_pg1.html';
+        return;
+      }
+      document.getElementById('clientName').textContent = client.nume || '-';
+      document.getElementById('clientPhone').textContent = client.telefon || '-';
+      localStorage.setItem('programare_durata', String(durataSelectata));
+    }
+
+    function goBack() {
+      window.location.href = 'Programare_noua_premium_pg1.html';
+    }
+
+    function goHome() {
+      window.location.href = 'index_premium.html';
+    }
+
+    function nextStep() {
+      localStorage.setItem('programare_durata', String(durataSelectata));
+      window.location.href = 'Programare_noua_premium_pg3.html';
+    }
+
+    init();
+  </script>
+</body>
+</html>

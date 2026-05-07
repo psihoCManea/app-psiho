@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  <style>
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      min-height: 100%;
+      font-family: Arial, sans-serif;
+      background:
+        radial-gradient(circle at top center, rgba(170,120,20,0.75) 0%, rgba(40,28,8,0.95) 30%, #030303 72%),
+        linear-gradient(180deg, #080808 0%, #000 100%);
+      color: #fff;
+    }
+
+    .page {
+      min-height: 100vh;
+      padding: 12px 10px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .title {
+      font-size: 28px;
+      font-weight: 900;
+      color: #f2c94c;
+    }
+
+    .subtitle {
+      margin-top: 6px;
+      font-size: 20px;
+      color: white;
+    }
+
+    .menu-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .menu-card {
+      height: 45px;
+      border-radius: 16px;
+      background: linear-gradient(145deg, #f6d257, #a96f10);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      color: #111;
+      cursor: pointer;
+    }
+
+    .menu-card.active {
+      outline: 4px solid #fff;
+    }
+
+    .programari-list {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .zi-bloc {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      margin-bottom: 8px;
+    }
+
+    .zi-titlu {
+      color: #ff4040;
+      font-size: 15px;
+      font-weight: 900;
+      padding: 4px 2px 2px;
+      text-align: left;
+    }
+
+    .programare-card {
+      border: 1px solid #f2c94c;
+      border-radius: 14px;
+      padding: 5px 7px 5px 10px;
+      background: rgba(12, 24, 38, 0.88);
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .programare-card.blocare-card {
+      border-color: #ff4040;
+      background: rgba(255, 64, 64, 0.10);
+    }
+
+    .blocare-label {
+      color: #ff4040;
+      font-size: 13px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .programare-text {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .programare-nume {
+      font-size: 14px;
+      font-weight: normal;
+      text-align: left;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .programare-detalii {
+      margin-top: 2px;
+      font-size: 11px;
+      font-weight: normal;
+      color: #f2c94c;
+      text-align: left;
+    }
+
+    .delete-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 9px;
+      border: none;
+      background: #d71920;
+      color: #fff;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      line-height: 1;
+      padding: 0;
+    }
+
+
+    .conf-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 9px;
+      border: none;
+      background: #1f6fff;
+      color: #fff;
+      font-size: 9px;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: default;
+      flex-shrink: 0;
+      line-height: 1;
+      padding: 0;
+      text-transform: uppercase;
+    }
+
+    .confirm-delete-box {
+      margin-top: 5px;
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 12px;
+      padding: 7px 8px;
+      background: rgba(10, 22, 36, 0.95);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .confirm-delete-text {
+      font-size: 12px;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .confirm-delete-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .confirm-small-btn {
+      border: none;
+      border-radius: 8px;
+      padding: 5px 9px;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .confirm-small-btn.ok {
+      background: #1fae4b;
+    }
+
+    .confirm-small-btn.cancel {
+      background: #d71920;
+    }
+
+    .programare-card.trecuta .programare-nume {
+      color: rgba(255,255,255,0.20);
+    }
+
+    .programare-card.trecuta .programare-detalii {
+      color: rgba(242,201,76,0.20);
+    }
+
+    .empty-card {
+      border-radius: 16px;
+      padding: 14px;
+      background: rgba(12, 24, 38, 0.72);
+      text-align: center;
+    }
+
+    .bottom-bar {
+      margin-top: auto;
+      display: flex;
+    }
+
+    .box-btn {
+      flex: 1;
+      height: 45px;
+      border-radius: 14px;
+      background: linear-gradient(145deg, #f6d257, #a96f10);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: 900;
+      color: #111;
+      cursor: pointer;
+    }
+  
+/* ===== SIMULARE TELEFON DESKTOP ===== */
+@media (min-width: 701px) {
+
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+    overflow: hidden;
+  }
+
+  .page {
+    width: min(430px, 92vw);
+    height: min(860px, 92vh);
+    min-height: 0;
+    background:
+      radial-gradient(circle at top center, rgba(170,120,20,0.75) 0%, rgba(40,28,8,0.95) 30%, #030303 72%),
+      linear-gradient(180deg, #080808 0%, #000 100%);
+    border: 2px solid rgba(255,255,255,0.18);
+    border-radius: 38px;
+    box-shadow:
+      0 0 0 8px rgba(255,255,255,0.04),
+      0 25px 70px rgba(0,0,0,0.65);
+    position: relative;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .page::before {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 110px;
+    height: 16px;
+    border-radius: 0 0 14px 14px;
+    background: rgba(0,0,0,0.9);
+    z-index: 20;
+  }
+
+  .page::after {
+    content: '';
+    position: absolute;
+    top: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 46px;
+    height: 4px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.18);
+    z-index: 21;
+  }
+}
+
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const supabaseClient = window.supabase.createClient(
+  'https://hnvqauxqxtdzgyqumkqa.supabase.co',
+  'sb_publishable_k1pGTW92yAbLX3PKRQjFpQ_0AQBRker'
+);
+</script>
+
+</head>
+
+<body>
+  <div class="page">
+
+    <div class="header">
+      <div class="title">Programări</div>
+      <div class="subtitle">Alege lista</div>
+    </div>
+
+    <div class="menu-grid">
+      <div class="menu-card active" onclick="selectTab(this, 'azi')">Azi</div>
+      <div class="menu-card" onclick="selectTab(this, 'maine')">Mâine</div>
+      <div class="menu-card" onclick="selectTab(this, 'toate')">Toate</div>
+    </div>
+
+    <div class="programari-list" id="programariList"></div>
+
+    <div class="bottom-bar">
+      <div class="box-btn" onclick="goHome()">⌂ HOME</div>
+    </div>
+
+  </div>
+
+  <script>
+    /* BLOC 1 - SETĂRI PROGRAMĂRI */
+    var filtruActiv = 'azi';
+    var stergereId = null;
+    var programariOriginale = [];
+    var blocariOriginale = [];
+
+    /* BLOC 2 - SCHIMBARE FILTRU AZI / MÂINE / TOATE */
+    function selectTab(el, filtru) {
+      document.querySelectorAll('.menu-card').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+      filtruActiv = filtru;
+      renderProgramari();
+    }
+
+    /* BLOC 3 - CITIRE PROGRAMĂRI ȘI BLOCĂRI DIN SUPABASE */
+    async function incarcaProgramari() {
+      const lista = document.getElementById('programariList');
+      lista.innerHTML = '<div class="empty-card">Se încarcă...</div>';
+
+      const { data, error } = await supabaseClient
+        .from('programari')
+        .select('*')
+        .order('data', { ascending: true })
+        .order('ora_start', { ascending: true });
+
+      if (error) {
+        console.log('EROARE PROGRAMARI SUPABASE:', error);
+        lista.innerHTML = '<div class="empty-card">Eroare la citirea programărilor</div>';
+        return;
+      }
+
+      programariOriginale = (data || []).map(function(p) {
+        return {
+          tipCard: 'programare',
+          id: p.id,
+          deleteKey: 'programare_' + p.id,
+          deleteId: p.id,
+          deleteTip: 'programare',
+          status: p.status || 'noua',
+          client: {
+            nume: p.nume_client || '-',
+            telefon: p.telefon || ''
+          },
+          interval: (p.ora_start || '') + ' - ' + (p.ora_final || ''),
+          confirmare_trimisa: p.confirmare_trimisa === true,
+          zi: {
+            dataIso: p.data || '',
+            titlu: p.data || ''
+          }
+        };
+      });
+
+      const { data: blocari, error: errorBlocari } = await supabaseClient
+        .from('indisponibilitati')
+        .select('*')
+        .eq('activa', true)
+        .order('data_start', { ascending: true })
+        .order('ora_start', { ascending: true });
+
+      if (errorBlocari) {
+        console.log('EROARE INDISPONIBILITATI SUPABASE:', errorBlocari);
+        blocariOriginale = [];
+      } else {
+        blocariOriginale = (blocari || []).flatMap(function(b) {
+          const tip = b.tip || 'interval';
+          const start = b.data_start || '';
+          const end = b.data_final || b.data_start || '';
+
+          // Dacă NU e concediu -> comportament normal
+          if (tip !== 'concediu' || !start) {
+            return [{
+              tipCard: 'blocare',
+              id: b.id,
+              originalId: b.id,
+              deleteKey: 'blocare_' + b.id,
+              deleteId: b.id,
+              deleteTip: 'blocare',
+              status: 'blocare',
+              mesaj: b.mesaj || 'Închis',
+              tipIndisponibilitate: tip,
+              data_final: b.data_final || '',
+              interval: ((b.ora_start || '08:00').slice(0,5)) + ' - ' + ((b.ora_final || '22:00').slice(0,5)),
+              zi: {
+                dataIso: start,
+                titlu: start
+              }
+            }];
+          }
+
+          // Concediu -> generăm câte un card pe fiecare zi
+          const rezultate = [];
+          try {
+            const dStart = new Date(start);
+            const dEnd = new Date(end);
+
+            for (let d = new Date(dStart); d <= dEnd; d.setDate(d.getDate() + 1)) {
+              const iso = new Date(d.getFullYear(), d.getMonth(), d.getDate()).toLocaleDateString('en-CA');
+              rezultate.push({
+                tipCard: 'blocare',
+                id: b.id + '_' + iso,
+                originalId: b.id,
+                deleteKey: 'blocare_' + b.id + '_' + iso,
+                deleteId: b.id,
+                deleteTip: 'blocare',
+                status: 'blocare',
+                mesaj: b.mesaj || 'Concediu',
+                tipIndisponibilitate: 'concediu',
+                data_final: end,
+                interval: ((b.ora_start || '08:00').slice(0,5)) + ' - ' + ((b.ora_final || '22:00').slice(0,5)),
+                zi: {
+                  dataIso: iso,
+                  titlu: iso
+                }
+              });
+            }
+          } catch(e) {
+            return [];
+          }
+
+          return rezultate;
+        });
+      }
+
+      renderProgramari();
+    }
+
+    /* BLOC 4 - AFIȘARE PROGRAMĂRI */
+    function renderProgramari() {
+      const lista = document.getElementById('programariList');
+
+      const azi = getDateIso(0);
+      const maine = getDateIso(1);
+
+      let programari = programariOriginale.concat(blocariOriginale)
+        .filter(function(p) {
+          if (!p || !p.zi || !p.zi.dataIso) return false;
+          if (p.status === 'stearsa') return false;
+          if (p.tipIndisponibilitate === 'concediu') {
+            if ((p.data_final || p.zi.dataIso) < azi) return false;
+          } else {
+            if (p.zi.dataIso < azi) return false;
+          }
+          if (p.tipCard !== 'blocare' && esteProgramareTrecuta(p)) return false;
+          return true;
+        })
+        .map(function(p) {
+          return {
+            date: p,
+            id: p.id,
+            deleteKey: p.deleteKey || String(p.id),
+            deleteId: p.deleteId || p.id,
+            deleteTip: p.deleteTip || p.tipCard
+          };
+        });
+
+      if (filtruActiv === 'azi') {
+        programari = programari.filter(item => item.date.zi.dataIso === azi);
+      }
+
+      if (filtruActiv === 'maine') {
+        programari = programari.filter(item => item.date.zi.dataIso === maine);
+      }
+
+      programari.sort((a, b) => {
+        const dataA = a.date.zi.dataIso + ' ' + getOraStart(a.date.interval);
+        const dataB = b.date.zi.dataIso + ' ' + getOraStart(b.date.interval);
+        return dataA.localeCompare(dataB);
+      });
+
+      if (!programari.length) {
+        lista.innerHTML = '<div class="empty-card">Nu există programări</div>';
+        return;
+      }
+
+      const grupuri = {};
+
+      programari.forEach(item => {
+        if (!grupuri[item.date.zi.dataIso]) grupuri[item.date.zi.dataIso] = [];
+        grupuri[item.date.zi.dataIso].push(item);
+      });
+
+      lista.innerHTML = Object.keys(grupuri).sort().map(dataIso => {
+        const titluZi = getTitluZi(grupuri[dataIso][0].date);
+
+        const carduri = grupuri[dataIso].map(item => {
+          const p = item.date;
+
+          const confirmare = String(stergereId) === String(item.deleteKey) ? `
+            <div class="confirm-delete-box">
+              <div class="confirm-delete-text">Confirmă ștergerea</div>
+              <div class="confirm-delete-actions">
+                <button class="confirm-small-btn ok" onclick="confirmaStergere('${item.deleteId}', '${item.deleteTip}')">Confirm</button>
+                <button class="confirm-small-btn cancel" onclick="renuntaStergere()">Renunț</button>
+              </div>
+            </div>
+          ` : '';
+
+          if (p.tipCard === 'blocare') {
+            return `
+              <div>
+                <div class="programare-card blocare-card">
+                  <div class="programare-text">
+                    <div class="blocare-label">${p.tipIndisponibilitate === 'concediu' ? 'CONCEDIU' : 'ÎNCHIS'}</div>
+                    <div class="programare-detalii">
+${p.tipIndisponibilitate === 'concediu' 
+? (p.zi.dataIso.split('-')[2] + '-' + p.zi.dataIso.split('-')[1]) + ' - ' + (p.data_final ? p.data_final.split('-')[2] + '-' + p.data_final.split('-')[1] : '') + ' · ' + (p.mesaj || 'Concediu')
+: (p.interval || '-') + ' · ' + (p.mesaj || 'Închis')}
+</div>
+                  </div>
+
+                  <button class="delete-btn" onclick="cereStergere('${item.deleteKey}')">🗑</button>
+                </div>
+                ${confirmare}
+              </div>
+            `;
+          }
+
+          const arataConfirmare =
+            p.confirmare_trimisa !== true &&
+            !aInceputProgramarea(p);
+
+          const arataReminder =
+            filtruActiv === 'azi' &&
+            p.status !== 'reminder_trimis' &&
+            !aInceputProgramarea(p);
+
+          return `
+            <div>
+              <div class="programare-card">
+                <div class="programare-text">
+                  <div class="programare-nume">${p.client && p.client.nume ? p.client.nume : '-'}</div>
+                  <div class="programare-detalii">${p.interval || '-'}</div>
+                </div>
+
+                ${arataConfirmare ? `<button class="conf-btn" onclick="trimiteConfirmare(\'${item.id}\')">CONF</button>` : ``}
+                ${arataReminder ? `<button style="background:#1fae4b;font-size:10px" class="delete-btn" onclick="trimiteReminder('${item.id}')">Rem</button>` : ``}
+                <button class="delete-btn" onclick="cereStergere('${item.deleteKey}')">🗑</button>
+              </div>
+              ${confirmare}
+            </div>
+          `;
+        }).join('');
+
+        return `
+          <div class="zi-bloc">
+            <div class="zi-titlu">${titluZi}</div>
+            ${carduri}
+          </div>
+        `;
+      }).join('');
+    }
+
+    /* BLOC 5 - CERERE ȘTERGERE PROGRAMARE */
+    function cereStergere(id) {
+      stergereId = id;
+      renderProgramari();
+    }
+
+    function renuntaStergere() {
+      stergereId = null;
+      renderProgramari();
+    }
+
+    /* BLOC 6 - ȘTERGERE LOGICĂ ÎN SUPABASE */
+    async function confirmaStergere(id, tipCard) {
+      const idFinal = /^[0-9]+$/.test(String(id)) ? Number(id) : String(id);
+
+      if (!idFinal) {
+        console.log('ID INVALID PENTRU STERGERE:', id, tipCard);
+        return;
+      }
+
+      if (tipCard === 'blocare') {
+        const { error } = await supabaseClient
+          .from('indisponibilitati')
+          .update({ activa: false })
+          .eq('id', idFinal);
+
+        if (error) {
+          console.log('EROARE STERGERE BLOCARE SUPABASE:', error);
+          alert('Eroare ștergere blocare');
+          return;
+        }
+
+        stergereId = null;
+        await incarcaProgramari();
+        return;
+      }
+
+      const { error } = await supabaseClient
+        .from('programari')
+        .update({ status: 'stearsa' })
+        .eq('id', idFinal);
+
+      if (error) {
+        console.log('EROARE STERGERE PROGRAMARE SUPABASE:', error);
+        alert('Eroare ștergere programare');
+        return;
+      }
+
+      stergereId = null;
+      await incarcaProgramari();
+    }
+
+    /* BLOC 7 - VERIFICARE PROGRAMARE ÎNCEPUTĂ */
+    function aInceputProgramarea(programare) {
+      if (!programare || !programare.zi || !programare.zi.dataIso || !programare.interval) return false;
+
+      const oraStart = getOraStart(programare.interval);
+      if (!oraStart) return false;
+
+      const startProgramare = new Date(programare.zi.dataIso + 'T' + oraStart + ':00');
+
+      return new Date() >= startProgramare;
+    }
+
+    /* BLOC 8 - VERIFICARE PROGRAMARE TERMINATĂ */
+    function esteProgramareTrecuta(programare) {
+      if (!programare || !programare.zi || !programare.zi.dataIso || !programare.interval) return false;
+
+      const parti = programare.interval.split('-');
+      if (parti.length < 2) return false;
+
+      const oraFinal = parti[1].trim();
+      const finalProgramare = new Date(programare.zi.dataIso + 'T' + oraFinal + ':00');
+
+      return new Date() >= finalProgramare;
+    }
+
+    /* BLOC 9 - ORĂ START */
+    function getOraStart(interval) {
+      if (!interval) return '';
+      return interval.split('-')[0].trim();
+    }
+
+    /* BLOC 10 - TITLU ZI */
+    function getTitluZi(programare) {
+      if (!programare || !programare.zi || !programare.zi.dataIso) return '';
+
+      const d = new Date(programare.zi.dataIso);
+      const zile = ['Duminică','Luni','Marți','Miercuri','Joi','Vineri','Sâmbătă'];
+
+      const zi = zile[d.getDay()];
+      const ziNr = String(d.getDate()).padStart(2,'0');
+      const luna = String(d.getMonth()+1).padStart(2,'0');
+
+      return zi + ' ' + ziNr + '-' + luna;
+    }
+
+    /* BLOC 11 - DATĂ AZI / MÂINE */
+    function getDateIso(offset) {
+      const d = new Date();
+      d.setDate(d.getDate() + offset);
+      return new Date(d.getFullYear(), d.getMonth(), d.getDate()).toLocaleDateString('en-CA');
+    }
+
+    /* BLOC 12 - HOME */
+    function goHome() {
+      window.location.href = 'index_premium.html';
+    }
+
+    /* BLOC 13 - TRIMITERE REMINDER WHATSAPP */
+    async function trimiteReminder(id) {
+      const p = programariOriginale.find(function(item) {
+        return String(item.id) === String(id);
+      });
+
+      if (!p || !p.client || !p.client.telefon) return;
+
+      const tel = p.client.telefon.replace(/[^0-9]/g, '');
+      const mesaj = encodeURIComponent(
+`*---HAIR CRAFT---*
+Salut,
+Reminder programare azi *${p.interval}*
+Daca intarzii sau nu poti ajunge te rog sa ma anunti din timp!
+Multumesc`
+      );
+
+      let finalTel = tel;
+      if (finalTel.startsWith('0')) finalTel = '40' + finalTel.substring(1);
+
+      window.open(`https://wa.me/${finalTel}?text=${mesaj}`, '_blank');
+
+      const { error } = await supabaseClient
+        .from('programari')
+        .update({ status: 'reminder_trimis' })
+        .eq('id', id);
+
+      if (error) {
+        console.log('EROARE REMINDER SUPABASE:', error);
+        return;
+      }
+
+      incarcaProgramari();
+    }
+
+    /* BLOC 14 - PORNIRE PAGINĂ */
+    incarcaProgramari();
+  
+/* BLOC 15 - TRIMITERE CONFIRMARE WHATSAPP */
+async function trimiteConfirmare(id) {
+  const p = programariOriginale.find(item => String(item.id) === String(id));
+  if (!p || !p.client || !p.client.telefon) return;
+
+  const tel = p.client.telefon.replace(/[^0-9]/g, '');
+  const mesaj = encodeURIComponent(
+`--- *HAIR CRAFT* ---
+Salut,
+Iti confirm programarea:
+*${p.zi.titlu}, ${p.interval}*
+Daca nu poti ajunge, te rog sa ma anunti din timp.
+Multumesc!`
+  );
+
+  let finalTel = tel;
+  if (finalTel.startsWith('0')) finalTel = '40' + finalTel.substring(1);
+
+  window.open(`https://wa.me/${finalTel}?text=${mesaj}`, '_blank');
+
+  const { error } = await supabaseClient
+    .from('programari')
+    .update({ confirmare_trimisa: true })
+    .eq('id', id);
+
+  if (!error) incarcaProgramari();
+}
+</script>
+</body>
+</html>
