@@ -1,0 +1,60 @@
+/* ===== RESET GENERAL ===== */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+
+/* ===== PAGINA ===== */
+
+body{
+    background:#111111;
+    color:white;
+    font-family:Arial, sans-serif;
+    min-height:100vh;
+}
+
+
+/* ===== CONTAINER TELEFON DESKTOP ===== */
+
+.phone-frame{
+    width:100%;
+    max-width:430px;
+    min-height:100vh;
+
+    margin:auto;
+
+    background:#111111;
+
+    border-left:2px solid #7a6a58;
+    border-right:2px solid #7a6a58;
+
+    padding:20px;
+}
+
+
+/* ===== TITLU ===== */
+
+.main-title{
+    text-align:center;
+
+    margin-top:60px;
+
+    font-size:34px;
+    font-weight:bold;
+}
+
+
+/* ===== SUBTITLU ===== */
+
+.sub-title{
+    text-align:center;
+
+    margin-top:20px;
+
+    font-size:18px;
+
+    opacity:0.8;
+}
