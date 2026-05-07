@@ -1,0 +1,16 @@
+{
+  "name": "Psihoterapeut Cristian Manea",
+  "short_name": "Cristian Manea",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#050505",
+  "theme_color": "#050505",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
