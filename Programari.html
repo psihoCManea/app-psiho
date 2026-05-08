@@ -787,11 +787,11 @@ ${p.tipIndisponibilitate === 'concediu'
 
       const tel = p.client.telefon.replace(/[^0-9]/g, '');
       const mesaj = encodeURIComponent(
-`*---HAIR CRAFT---*
-Salut,
+`Buna,
 Reminder programare azi *${p.interval}*
-Daca intarzii sau nu poti ajunge te rog sa ma anunti din timp!
-Multumesc`
+Daca intervine ceva, te rog sa ma anunti din timp!
+Multumesc
+Cristian Manea`
       );
 
       let finalTel = tel;
@@ -822,12 +822,11 @@ async function trimiteConfirmare(id) {
 
   const tel = p.client.telefon.replace(/[^0-9]/g, '');
   const mesaj = encodeURIComponent(
-`--- *HAIR CRAFT* ---
-Salut,
-Iti confirm programarea:
-*${p.zi.titlu}, ${p.interval}*
-Daca nu poti ajunge, te rog sa ma anunti din timp.
-Multumesc!`
+`Buna,
+Reminder programare azi *${p.interval}*
+Daca intervine ceva, te rog sa ma anunti din timp!
+Multumesc
+Cristian Manea`
   );
 
   let finalTel = tel;
