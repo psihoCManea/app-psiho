@@ -606,7 +606,7 @@ MODIFICARI:
     }
 
     function goHome() {
-      window.location.href = 'index_premium.html';
+      window.location.href = 'index.html';
     }
 
     init();
@@ -620,12 +620,12 @@ MODIFICARI:
     }
 
   var mesaj =
-  `--- *HAIR CRAFT* ---
-  Salut,
+  `Buna,
   Iti confirm programarea:
   *${data.zi.titlu}, ${data.interval}*
-  Daca nu poti ajunge, te rog sa ma anunti din timp.
-  Multumesc!`;
+  Daca intervine ceva, te rog sa ma anunti din timp.
+  Multumesc!
+  Cristian Manea`;
 
   var telefon = (client.telefon || "").replace(/\D/g, "");
   var url = "https://wa.me/" + telefon + "?text=" + encodeURIComponent(mesaj);
