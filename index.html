@@ -384,6 +384,55 @@ const client = window.supabase.createClient(
 );
 </script>
 
+
+<style>
+/* =======================================================
+   TELEFON DESKTOP GLOBAL - ADAUGAT SIGUR
+   Se aplica doar pe desktop. Pe telefon nu schimba nimic.
+======================================================= */
+@media (min-width: 701px) {
+
+    html,
+    body {
+        min-height: 100vh !important;
+        margin: 0 !important;
+        overflow: hidden !important;
+    }
+
+    body {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        padding: 24px !important;
+        background: radial-gradient(circle at top, #1f2f2d 0%, #111111 42%, #050505 100%) !important;
+    }
+
+    body::before {
+        content: "";
+        position: fixed;
+        width: min(430px, 92vw);
+        height: min(900px, 94vh);
+        border-radius: 42px;
+        border: 2px solid rgba(128,118,103,0.95);
+        box-shadow:
+            0 0 0 3px rgba(255,255,255,0.04),
+            0 0 0 10px #000000,
+            0 35px 80px rgba(0,0,0,0.85);
+        pointer-events: none;
+        z-index: 999999;
+    }
+
+    body > * {
+        width: min(430px, 92vw) !important;
+        max-width: 430px !important;
+        height: min(900px, 94vh) !important;
+        max-height: 94vh !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        border-radius: 42px !important;
+    }
+}
+</style>
 </head>
 
 <body>
