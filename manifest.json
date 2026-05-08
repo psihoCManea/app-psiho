@@ -1,0 +1,9 @@
+{
+  "name": "Psihoterapeut Cristian Manea",
+  "short_name": "Cristian Manea",
+  "start_url": "/app-psiho/index.html",
+  "display": "standalone",
+  "background_color": "#020202",
+  "theme_color": "#020202",
+  "orientation": "portrait"
+}
