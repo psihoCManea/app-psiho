@@ -1005,6 +1005,97 @@
       }
     }
 
+
+    /* BLOC 60 ZILE - LUNI COMPACTE ȘI ZILE PE ORIZONTALĂ */
+    .month-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      margin-top: -4px;
+      margin-bottom: -2px;
+      flex-shrink: 0;
+    }
+
+    .month-btn {
+      min-width: 82px;
+      height: 28px;
+      padding: 0 8px;
+      border-radius: 12px;
+      border: 1px solid rgba(244,195,99,0.85);
+      background: rgba(0,0,0,0.45);
+      color: #f4c363;
+      font-size: 11px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .month-btn.active {
+      background: linear-gradient(145deg, #f6d257, #a96f10);
+      color: #111;
+    }
+
+    .days-row {
+      display: flex !important;
+      grid-template-columns: none !important;
+      overflow-x: auto;
+      overflow-y: hidden;
+      gap: 4px;
+      padding-bottom: 2px;
+      flex-shrink: 0;
+      scrollbar-width: thin;
+    }
+
+    .day-card {
+      min-width: 50px;
+      max-width: 50px;
+      min-height: 44px !important;
+      padding: 3px 2px;
+      flex-shrink: 0;
+    }
+
+    .day-name {
+      font-size: 10px !important;
+      margin-bottom: 2px;
+      line-height: 1;
+    }
+
+    .day-number {
+      font-size: 15px !important;
+      line-height: 1;
+    }
+
+    .day-month {
+      font-size: 9px !important;
+      margin-top: 2px;
+      line-height: 1;
+    }
+
+    .client-search-card {
+      padding: 8px;
+    }
+
+    .client-search-input {
+      height: 38px;
+      font-size: 15px;
+    }
+
+    .client-results {
+      max-height: 70px;
+    }
+
+    .client-selected-box {
+      padding: 7px 8px;
+    }
+
+    .message-box {
+      min-height: 58px !important;
+      padding: 8px 10px !important;
+    }
+
+    .confirm-btn {
+      padding: 9px 12px !important;
+    }
+
 </style>
 
   <!-- BLOC SUPABASE - CONECTARE BAZĂ DE DATE -->
@@ -1042,7 +1133,7 @@
     <!-- BLOC CLIENT - CĂUTARE ȘI SELECTARE CLIENT -->
     <div class="client-search-card">
       <div class="client-search-label">Caută client</div>
-      <input id="clientSearch" class="client-search-input" placeholder="Ex: Cris" oninput="searchClients()">
+      <input id="clientSearch" class="client-search-input" placeholder="Ex: Miha" oninput="searchClients()">
       <div id="clientResults" class="client-results"></div>
 
       <div class="client-selected-box">
@@ -1053,6 +1144,9 @@
     </div>
 
     <div class="section-title">▣ Zile disponibile</div>
+
+    <!-- BLOC 60 ZILE - BUTOANE LUNI -->
+    <div class="month-buttons" id="monthButtons"></div>
 
     <div class="days-row" id="daysRow"></div>
 
@@ -1093,6 +1187,9 @@
     var confirmata = false;
 
     var zile = [];
+    var toateZilele = [];
+    var luniDisponibile = [];
+    var lunaSelectataIndex = 0;
     var zileNume = ['Du', 'Lu', 'Ma', 'Mi', 'Joi', 'Vi', 'Sa'];
     var zileTitlu = ['DUMINICĂ', 'LUNI', 'MARȚI', 'MIERCURI', 'JOI', 'VINERI', 'SÂMBĂTĂ'];
     var luni = ['Ian', 'Feb', 'Mar', 'Apr', 'Mai', 'Iun', 'Iul', 'Aug', 'Sep', 'Oct', 'Noi', 'Dec'];
@@ -1117,6 +1214,7 @@
       }
 
       buildDynamicDays();
+      renderMonthButtons();
       await incarcaOcupateDinSupabase();
       renderDays();
       renderSlots();
@@ -1192,26 +1290,92 @@
       document.getElementById('clientPhone').textContent = c && c.telefon ? c.telefon : '-';
     }
 
+    /* BLOC 60 ZILE - CONSTRUIRE ZILE ȘI LUNI DISPONIBILE */
     function buildDynamicDays() {
+      toateZilele = [];
+      luniDisponibile = [];
       zile = [];
+
       var azi = new Date();
 
-      for (var i = 0; i < 7; i++) {
+      for (var i = 0; i < 60; i++) {
         var d = new Date(azi);
         d.setDate(azi.getDate() + i);
 
         var ziIndex = d.getDay();
         var lunaIndex = d.getMonth();
         var nr = String(d.getDate());
+        var lunaKey = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
 
-        zile.push({
+        var ziObj = {
           nume: zileNume[ziIndex],
           nr: nr,
           luna: luni[lunaIndex],
           titlu: zileTitlu[ziIndex] + ', ' + nr + ' ' + luniTitlu[lunaIndex],
-          dataIso: formatDateIso(d)
-        });
+          dataIso: formatDateIso(d),
+          lunaKey: lunaKey,
+          lunaNume: luniTitlu[lunaIndex]
+        };
+
+        toateZilele.push(ziObj);
+
+        if (!luniDisponibile.find(function(l) { return l.key === lunaKey; })) {
+          luniDisponibile.push({
+            key: lunaKey,
+            nume: luniTitlu[lunaIndex]
+          });
+        }
       }
+
+      lunaSelectataIndex = 0;
+      seteazaZilePentruLuna();
+    }
+
+    function seteazaZilePentruLuna() {
+      var luna = luniDisponibile[lunaSelectataIndex];
+      if (!luna) {
+        zile = [];
+        ziSelectataIndex = 0;
+        return;
+      }
+
+      zile = toateZilele.filter(function(zi) {
+        return zi.lunaKey === luna.key;
+      });
+
+      ziSelectataIndex = 0;
+      oraSelectataIndex = null;
+      confirmata = false;
+    }
+
+    function renderMonthButtons() {
+      var box = document.getElementById('monthButtons');
+      if (!box) return;
+
+      box.innerHTML = '';
+
+      luniDisponibile.forEach(function(luna, index) {
+        var btn = document.createElement('button');
+        btn.className = 'month-btn' + (index === lunaSelectataIndex ? ' active' : '');
+        btn.textContent = luna.nume;
+        btn.onclick = function() {
+          selectMonth(index);
+        };
+        box.appendChild(btn);
+      });
+    }
+
+    async function selectMonth(index) {
+      lunaSelectataIndex = index;
+      seteazaZilePentruLuna();
+      await incarcaOcupateDinSupabase();
+      renderMonthButtons();
+      renderDays();
+      renderSlots();
+      updateAvailabilityTitle();
+      resetMessage();
+      setConfirmEnabled(false);
+      resetButton();
     }
 
     function renderDays() {
@@ -1318,7 +1482,7 @@
 
     /* BLOC SUPABASE - CITIRE SLOTURI OCUPATE */
     async function incarcaOcupateDinSupabase() {
-      ocupatePeZile = [[], [], [], [], [], [], []];
+      ocupatePeZile = zile.map(function() { return []; });
 
       try {
         var dateStart = zile[0].dataIso;
@@ -1406,7 +1570,7 @@
     }
 
     function getOcupatePentruZi() {
-      var ocupate = ocupatePeZile[ziSelectataIndex].slice();
+      var ocupate = (ocupatePeZile[ziSelectataIndex] || []).slice();
 
       if (ziSelectataIndex === 0) {
         var acum = new Date();
