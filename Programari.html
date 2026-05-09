@@ -397,14 +397,11 @@ const supabaseClient = window.supabase.createClient(
 
     <div class="header">
       <div class="title">Programări</div>
-      <div class="subtitle">Alege lista</div>
+      <div class="subtitle">Alege luna</div>
     </div>
 
-    <div class="menu-grid">
-      <div class="menu-card active" onclick="selectTab(this, 'azi')">Azi</div>
-      <div class="menu-card" onclick="selectTab(this, 'maine')">Mâine</div>
-      <div class="menu-card" onclick="selectTab(this, 'toate')">Toate</div>
-    </div>
+    <!-- BLOC HTML - SELECTARE LUNĂ DIN CELE 60 ZILE -->
+    <div class="menu-grid" id="monthMenu"></div>
 
     <div class="programari-list" id="programariList"></div>
 
@@ -416,16 +413,62 @@ const supabaseClient = window.supabase.createClient(
 
   <script>
     /* BLOC 1 - SETĂRI PROGRAMĂRI */
-    var filtruActiv = 'azi';
+    var lunaActivaIndex = 0;
+    var luniDisponibile = [];
     var stergereId = null;
     var programariOriginale = [];
     var blocariOriginale = [];
 
-    /* BLOC 2 - SCHIMBARE FILTRU AZI / MÂINE / TOATE */
-    function selectTab(el, filtru) {
-      document.querySelectorAll('.menu-card').forEach(c => c.classList.remove('active'));
-      el.classList.add('active');
-      filtruActiv = filtru;
+    const LUNI_BUTOANE = ['Ianuarie', 'Februarie', 'Martie', 'Aprilie', 'Mai', 'Iunie', 'Iulie', 'August', 'Septembrie', 'Octombrie', 'Noiembrie', 'Decembrie'];
+
+    /* BLOC 2 - SELECTARE LUNĂ DIN CELE 60 ZILE */
+    function construiesteLuniDisponibile() {
+      const azi = new Date();
+      luniDisponibile = [];
+
+      for (let i = 0; i < 60; i++) {
+        const d = new Date(azi);
+        d.setDate(azi.getDate() + i);
+
+        const cheie = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+
+        if (!luniDisponibile.some(luna => luna.cheie === cheie)) {
+          luniDisponibile.push({
+            cheie: cheie,
+            nume: LUNI_BUTOANE[d.getMonth()],
+            an: d.getFullYear(),
+            luna: d.getMonth()
+          });
+        }
+      }
+
+      if (!luniDisponibile[lunaActivaIndex]) {
+        lunaActivaIndex = 0;
+      }
+    }
+
+    function renderButoaneLuni() {
+      const box = document.getElementById('monthMenu');
+      if (!box) return;
+
+      construiesteLuniDisponibile();
+
+      box.innerHTML = '';
+
+      luniDisponibile.forEach(function(luna, index) {
+        const div = document.createElement('div');
+        div.className = 'menu-card' + (index === lunaActivaIndex ? ' active' : '');
+        div.textContent = luna.nume;
+        div.onclick = function() {
+          selectLuna(index);
+        };
+        box.appendChild(div);
+      });
+    }
+
+    function selectLuna(index) {
+      lunaActivaIndex = index;
+      renderButoaneLuni();
       renderProgramari();
     }
 
@@ -542,6 +585,27 @@ const supabaseClient = window.supabase.createClient(
       renderProgramari();
     }
 
+    /* BLOC 3A - VERIFICARE DATĂ ÎN LUNA SELECTATĂ */
+    function esteInLunaSelectata(dataIso) {
+      if (!dataIso) return false;
+
+      construiesteLuniDisponibile();
+
+      const luna = luniDisponibile[lunaActivaIndex];
+      if (!luna) return false;
+
+      return dataIso.indexOf(luna.cheie) === 0;
+    }
+
+    function esteInUrmatoarele60Zile(dataIso) {
+      if (!dataIso) return false;
+
+      const azi = getDateIso(0);
+      const limita = getDateIso(59);
+
+      return dataIso >= azi && dataIso <= limita;
+    }
+
     /* BLOC 4 - AFIȘARE PROGRAMĂRI */
     function renderProgramari() {
       const lista = document.getElementById('programariList');
@@ -559,6 +623,8 @@ const supabaseClient = window.supabase.createClient(
             if (p.zi.dataIso < azi) return false;
           }
           if (p.tipCard !== 'blocare' && esteProgramareTrecuta(p)) return false;
+          if (!esteInUrmatoarele60Zile(p.zi.dataIso)) return false;
+          if (!esteInLunaSelectata(p.zi.dataIso)) return false;
           return true;
         })
         .map(function(p) {
@@ -570,14 +636,6 @@ const supabaseClient = window.supabase.createClient(
             deleteTip: p.deleteTip || p.tipCard
           };
         });
-
-      if (filtruActiv === 'azi') {
-        programari = programari.filter(item => item.date.zi.dataIso === azi);
-      }
-
-      if (filtruActiv === 'maine') {
-        programari = programari.filter(item => item.date.zi.dataIso === maine);
-      }
 
       programari.sort((a, b) => {
         const dataA = a.date.zi.dataIso + ' ' + getOraStart(a.date.interval);
@@ -638,7 +696,7 @@ ${p.tipIndisponibilitate === 'concediu'
             !aInceputProgramarea(p);
 
           const arataReminder =
-            filtruActiv === 'azi' &&
+            p.zi && p.zi.dataIso === azi &&
             p.reminder_trimis !== true &&
             !aInceputProgramarea(p);
 
@@ -813,6 +871,7 @@ Cristian Manea`
     }
 
     /* BLOC 14 - PORNIRE PAGINĂ */
+    renderButoaneLuni();
     incarcaProgramari();
   
 /* BLOC 15 - TRIMITERE CONFIRMARE WHATSAPP */
