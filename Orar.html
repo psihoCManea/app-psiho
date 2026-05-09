@@ -126,8 +126,8 @@
     }
 
     .cell {
-      min-height: 25px;
-      padding: 3px 2px;
+      min-height: 46px;
+      padding: 4px 3px;
       border-right: 1px solid rgba(242,201,76,0.35);
       border-bottom: 1px solid rgba(242,201,76,0.28);
       display: flex;
@@ -137,7 +137,9 @@
       font-size: 10px;
       font-weight: 900;
       color: #111;
-      line-height: 1.05;
+      line-height: 1.12;
+      white-space: normal;
+      word-break: break-word;
     }
 
     .hour-cell {
@@ -155,7 +157,7 @@
       border-bottom: 2px solid black;
       top: 0;
       z-index: 2;
-      min-height: 30px;
+      min-height: 34px;
       background: linear-gradient(145deg, #f6d257, #a96f10);
       color: #111;
       font-size: 10px;
@@ -193,6 +195,19 @@
     .busy-past {
       background: rgba(128, 128, 128, 0.65);
       color: #f2c94c;
+    }
+
+    /* BLOC 5B - TEXT CLIENT ÎN ORAR */
+    .slot-text {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      width: 100%;
+      max-height: 28px;
+      font-size: 10px;
+      line-height: 1.15;
+      font-weight: 900;
     }
 
     .legend {
@@ -350,13 +365,9 @@
       <div class="title">Orar</div>
     </div>
 
-    <div class="subtitle">Alege luna și trage tabelul dreapta - stânga</div>
+    <div class="subtitle">Trage tabelul dreapta - stânga pentru următoarele 60 zile</div>
 
-    <!-- BLOC HTML 2A - SELECTARE LUNĂ -->
-    <div class="month-buttons">
-      <button id="btnLunaCurenta" class="month-btn active" onclick="schimbaLuna(0)">Luna</button>
-      <button id="btnLunaUrmatoare" class="month-btn" onclick="schimbaLuna(1)">Luna</button>
-    </div>
+    <!-- BLOC HTML 2A - ORAR PE 60 ZILE -->
 
     <!-- BLOC HTML 3 - TABEL -->
     <div class="orar-wrapper">
@@ -371,6 +382,7 @@
     const ORA_START = 8;
     const ORA_FINAL = 22;
     const DURATA_SLOT = 60;
+    const NUMAR_ZILE_AFISATE = 60;
 
     let lunaSelectataOffset = 0;
 
@@ -392,17 +404,10 @@
 
     function getDays() {
       const zile = [];
-      const azi = new Date();
-      const primaZiLuna = new Date(azi.getFullYear(), azi.getMonth() + lunaSelectataOffset, 1);
-      const ultimaZiLuna = new Date(azi.getFullYear(), azi.getMonth() + lunaSelectataOffset + 1, 0);
 
-      let startZi = new Date(primaZiLuna);
-
-      if (lunaSelectataOffset === 0) {
-        startZi = new Date(azi.getFullYear(), azi.getMonth(), azi.getDate());
-      }
-
-      for (let d = new Date(startZi); d <= ultimaZiLuna; d.setDate(d.getDate() + 1)) {
+      for (let i = 0; i < NUMAR_ZILE_AFISATE; i++) {
+        const d = new Date();
+        d.setDate(d.getDate() + i);
         const dataCurenta = new Date(d.getFullYear(), d.getMonth(), d.getDate());
 
         zile.push({
@@ -413,30 +418,6 @@
       }
 
       return zile;
-    }
-
-    function seteazaButoaneLuni() {
-      const azi = new Date();
-      const lunaCurenta = new Date(azi.getFullYear(), azi.getMonth(), 1);
-      const lunaUrmatoare = new Date(azi.getFullYear(), azi.getMonth() + 1, 1);
-
-      const btnCurenta = document.getElementById('btnLunaCurenta');
-      const btnUrmatoare = document.getElementById('btnLunaUrmatoare');
-
-      if (btnCurenta) {
-        btnCurenta.textContent = LUNI_BUTOANE[lunaCurenta.getMonth()];
-        btnCurenta.classList.toggle('active', lunaSelectataOffset === 0);
-      }
-
-      if (btnUrmatoare) {
-        btnUrmatoare.textContent = LUNI_BUTOANE[lunaUrmatoare.getMonth()];
-        btnUrmatoare.classList.toggle('active', lunaSelectataOffset === 1);
-      }
-    }
-
-    function schimbaLuna(offset) {
-      lunaSelectataOffset = offset;
-      renderOrar();
     }
 
     /* BLOC 9 - INTERVALE ORARE */
@@ -486,7 +467,7 @@
               },
               interval: p.ora_start + '-' + p.ora_final,
               oraStart: p.ora_start,
-              text: 'Ocupat'
+              text: p.nume_client || 'Ocupat'
             };
           }));
         }
@@ -577,7 +558,7 @@
     }
 
     function esteProgramareInceputa(dataIso, blocare) {
-      if (!blocare || blocare.text !== 'Ocupat' || !blocare.oraStart) return false;
+      if (!blocare || !blocare.oraStart) return false;
 
       const acum = new Date();
       const aziIso = new Date(acum.getFullYear(), acum.getMonth(), acum.getDate()).toLocaleDateString('en-CA');
@@ -593,6 +574,15 @@
       return acum > dataInceput;
     }
 
+    function escapeHtml(text) {
+      return String(text || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
     /* BLOC 12 - AFIȘARE TABEL */
     async function renderOrar() {
       const grid = document.getElementById('orarGrid');
@@ -600,7 +590,6 @@
       const slots = getSlots();
       const programari = await getProgramari();
 
-      seteazaButoaneLuni();
       grid.style.gridTemplateColumns = '74px repeat(' + zile.length + ', 76px)';
       grid.style.minWidth = (74 + (zile.length * 76)) + 'px';
 
@@ -625,7 +614,8 @@
           const ocupat = !!blocare;
           const programareInceputa = ocupat && esteProgramareInceputa(zi.dataIso, blocare);
           const clasaCelula = ocupat ? (programareInceputa ? 'busy-past' : 'busy') : 'free';
-          html += `<div class="cell ${clasaCelula}">${ocupat ? (blocare.text || 'Ocupat') : 'Liber'}</div>`;
+          const textCelula = ocupat ? (blocare.text || 'Ocupat') : 'Liber';
+          html += `<div class="cell ${clasaCelula}"><div class="slot-text">${escapeHtml(textCelula)}</div></div>`;
         });
       });
 
