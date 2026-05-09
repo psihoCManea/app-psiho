@@ -365,9 +365,10 @@
       <div class="title">Orar</div>
     </div>
 
-    <div class="subtitle">Trage tabelul dreapta - stânga pentru următoarele 60 zile</div>
+    <div class="subtitle">Alege luna și trage tabelul dreapta - stânga</div>
 
-    <!-- BLOC HTML 2A - ORAR PE 60 ZILE -->
+    <!-- BLOC HTML 2A - SELECTARE LUNĂ DIN CELE 60 ZILE -->
+    <div id="monthButtons" class="month-buttons"></div>
 
     <!-- BLOC HTML 3 - TABEL -->
     <div class="orar-wrapper">
@@ -402,7 +403,7 @@
       return new Date(d.getFullYear(), d.getMonth(), d.getDate()).toLocaleDateString('en-CA');
     }
 
-    function getDays() {
+    function getToateZilele60() {
       const zile = [];
 
       for (let i = 0; i < NUMAR_ZILE_AFISATE; i++) {
@@ -413,11 +414,68 @@
         zile.push({
           dataIso: dataCurenta.toLocaleDateString('en-CA'),
           ziScurt: ZILE_SCURT[dataCurenta.getDay()],
-          dataText: dataCurenta.getDate() + ' ' + LUNI[dataCurenta.getMonth()]
+          dataText: dataCurenta.getDate() + ' ' + LUNI[dataCurenta.getMonth()],
+          lunaCheie: dataCurenta.getFullYear() + '-' + dataCurenta.getMonth(),
+          lunaIndex: dataCurenta.getMonth()
         });
       }
 
       return zile;
+    }
+
+    function getLuniDisponibile() {
+      const toateZilele = getToateZilele60();
+      const luni = [];
+
+      toateZilele.forEach(function(zi) {
+        const exista = luni.some(function(luna) {
+          return luna.cheie === zi.lunaCheie;
+        });
+
+        if (!exista) {
+          luni.push({
+            cheie: zi.lunaCheie,
+            nume: LUNI_BUTOANE[zi.lunaIndex]
+          });
+        }
+      });
+
+      return luni;
+    }
+
+    function getDays() {
+      const toateZilele = getToateZilele60();
+      const luni = getLuniDisponibile();
+
+      if (!luni[lunaSelectataOffset]) {
+        lunaSelectataOffset = 0;
+      }
+
+      const lunaAleasa = luni[lunaSelectataOffset];
+
+      return toateZilele.filter(function(zi) {
+        return zi.lunaCheie === lunaAleasa.cheie;
+      });
+    }
+
+    function seteazaButoaneLuni() {
+      const container = document.getElementById('monthButtons');
+      if (!container) return;
+
+      const luni = getLuniDisponibile();
+      let html = '';
+
+      luni.forEach(function(luna, index) {
+        const clasa = index === lunaSelectataOffset ? 'month-btn active' : 'month-btn';
+        html += '<button class="' + clasa + '" onclick="schimbaLuna(' + index + ')">' + luna.nume + '</button>';
+      });
+
+      container.innerHTML = html;
+    }
+
+    function schimbaLuna(index) {
+      lunaSelectataOffset = index;
+      renderOrar();
     }
 
     /* BLOC 9 - INTERVALE ORARE */
@@ -590,6 +648,7 @@
       const slots = getSlots();
       const programari = await getProgramari();
 
+      seteazaButoaneLuni();
       grid.style.gridTemplateColumns = '74px repeat(' + zile.length + ', 76px)';
       grid.style.minWidth = (74 + (zile.length * 76)) + 'px';
 
