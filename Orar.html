@@ -641,6 +641,16 @@
         .replace(/'/g, '&#039;');
     }
 
+    /* BLOC 11A - DESCHIDE PROGRAMARE DIN CELULĂ LIBERĂ */
+    function deschideProgramareDinOrar(dataIso, oraStart) {
+      localStorage.setItem('programare_din_orar', JSON.stringify({
+        dataIso: dataIso,
+        oraStart: oraStart
+      }));
+
+      window.location.href = 'Programare_noua_premium_pg3.html';
+    }
+
     /* BLOC 12 - AFIȘARE TABEL */
     async function renderOrar() {
       const grid = document.getElementById('orarGrid');
@@ -674,7 +684,11 @@
           const programareInceputa = ocupat && esteProgramareInceputa(zi.dataIso, blocare);
           const clasaCelula = ocupat ? (programareInceputa ? 'busy-past' : 'busy') : 'free';
           const textCelula = ocupat ? (blocare.text || 'Ocupat') : 'Liber';
-          html += `<div class="cell ${clasaCelula}"><div class="slot-text">${escapeHtml(textCelula)}</div></div>`;
+          if (ocupat) {
+            html += `<div class="cell ${clasaCelula}"><div class="slot-text">${escapeHtml(textCelula)}</div></div>`;
+          } else {
+            html += `<div class="cell ${clasaCelula}" onclick="deschideProgramareDinOrar('${zi.dataIso}', '${minuteToText(slot.startMinute)}')"><div class="slot-text">${escapeHtml(textCelula)}</div></div>`;
+          }
         });
       });
 
