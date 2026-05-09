@@ -404,7 +404,7 @@ const supabaseClient = window.supabase.createClient(
       <div class="subtitle">Alege lista</div>
     </div>
 
-    <!-- BLOC HTML - SELECTARE LUNĂ DIN CELE 60 ZILE -->
+    <!-- BLOC HTML - SELECTARE LUNĂ DIN CELE 90 ZILE -->
     <div class="menu-grid month-grid" id="monthMenu"></div>
 
     <div class="menu-grid">
@@ -432,12 +432,12 @@ const supabaseClient = window.supabase.createClient(
 
     const LUNI_BUTOANE = ['Ianuarie', 'Februarie', 'Martie', 'Aprilie', 'Mai', 'Iunie', 'Iulie', 'August', 'Septembrie', 'Octombrie', 'Noiembrie', 'Decembrie'];
 
-    /* BLOC 1A - LUNI DISPONIBILE PENTRU URMĂTOARELE 60 ZILE */
+    /* BLOC 1A - LUNI DISPONIBILE PENTRU URMĂTOARELE 90 ZILE */
     function construiesteLuniDisponibile() {
       const azi = new Date();
       luniDisponibile = [];
 
-      for (let i = 0; i < 60; i++) {
+      for (let i = 0; i < 90; i++) {
         const d = new Date(azi);
         d.setDate(azi.getDate() + i);
 
@@ -608,7 +608,7 @@ const supabaseClient = window.supabase.createClient(
       renderProgramari();
     }
 
-    /* BLOC 3A - FILTRARE LUNĂ SELECTATĂ ȘI 60 ZILE */
+    /* BLOC 3A - FILTRARE LUNĂ SELECTATĂ ȘI 90 ZILE */
     function esteInLunaSelectata(dataIso) {
       if (!dataIso) return false;
 
@@ -620,11 +620,11 @@ const supabaseClient = window.supabase.createClient(
       return dataIso.indexOf(luna.cheie) === 0;
     }
 
-    function esteInUrmatoarele60Zile(dataIso) {
+    function esteInUrmatoarele90Zile(dataIso) {
       if (!dataIso) return false;
 
       const azi = getDateIso(0);
-      const limita = getDateIso(59);
+      const limita = getDateIso(89);
 
       return dataIso >= azi && dataIso <= limita;
     }
@@ -668,7 +668,7 @@ const supabaseClient = window.supabase.createClient(
 
       if (filtruActiv === 'toate') {
         programari = programari.filter(function(item) {
-          return esteInUrmatoarele60Zile(item.date.zi.dataIso) && esteInLunaSelectata(item.date.zi.dataIso);
+          return esteInUrmatoarele90Zile(item.date.zi.dataIso) && esteInLunaSelectata(item.date.zi.dataIso);
         });
       }
 
