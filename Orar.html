@@ -98,6 +98,33 @@
       min-width: 606px;
     }
 
+    /* BLOC 5A - BUTOANE LUNI */
+    .month-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: -2px;
+      margin-bottom: 2px;
+    }
+
+    .month-btn {
+      min-width: 92px;
+      height: 30px;
+      padding: 0 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(242,201,76,0.85);
+      background: rgba(0,0,0,0.45);
+      color: #f2c94c;
+      font-size: 12px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .month-btn.active {
+      background: linear-gradient(145deg, #f6d257, #a96f10);
+      color: #111;
+    }
+
     .cell {
       min-height: 25px;
       padding: 3px 2px;
@@ -323,7 +350,13 @@
       <div class="title">Orar</div>
     </div>
 
-    <div class="subtitle">Trage tabelul dreapta - stânga pentru toate cele 7 zile</div>
+    <div class="subtitle">Alege luna și trage tabelul dreapta - stânga</div>
+
+    <!-- BLOC HTML 2A - SELECTARE LUNĂ -->
+    <div class="month-buttons">
+      <button id="btnLunaCurenta" class="month-btn active" onclick="schimbaLuna(0)">Luna</button>
+      <button id="btnLunaUrmatoare" class="month-btn" onclick="schimbaLuna(1)">Luna</button>
+    </div>
 
     <!-- BLOC HTML 3 - TABEL -->
     <div class="orar-wrapper">
@@ -337,10 +370,13 @@
     /* BLOC 6 - SETĂRI ORAR */
     const ORA_START = 8;
     const ORA_FINAL = 22;
-    const DURATA_SLOT = 30;
+    const DURATA_SLOT = 60;
+
+    let lunaSelectataOffset = 0;
 
     const ZILE_SCURT = ['Du', 'Lu', 'Ma', 'Mi', 'Jo', 'Vi', 'Sa'];
     const LUNI = ['ian', 'feb', 'mar', 'apr', 'mai', 'iun', 'iul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+    const LUNI_BUTOANE = ['Ianuarie', 'Februarie', 'Martie', 'Aprilie', 'Mai', 'Iunie', 'Iulie', 'August', 'Septembrie', 'Octombrie', 'Noiembrie', 'Decembrie'];
 
     /* BLOC 7 - HOME */
     function goHome() {
@@ -356,19 +392,51 @@
 
     function getDays() {
       const zile = [];
+      const azi = new Date();
+      const primaZiLuna = new Date(azi.getFullYear(), azi.getMonth() + lunaSelectataOffset, 1);
+      const ultimaZiLuna = new Date(azi.getFullYear(), azi.getMonth() + lunaSelectataOffset + 1, 0);
 
-      for (let i = 0; i < 7; i++) {
-        const d = new Date();
-        d.setDate(d.getDate() + i);
+      let startZi = new Date(primaZiLuna);
+
+      if (lunaSelectataOffset === 0) {
+        startZi = new Date(azi.getFullYear(), azi.getMonth(), azi.getDate());
+      }
+
+      for (let d = new Date(startZi); d <= ultimaZiLuna; d.setDate(d.getDate() + 1)) {
+        const dataCurenta = new Date(d.getFullYear(), d.getMonth(), d.getDate());
 
         zile.push({
-          dataIso: getDateIso(i),
-          ziScurt: ZILE_SCURT[d.getDay()],
-          dataText: d.getDate() + ' ' + LUNI[d.getMonth()]
+          dataIso: dataCurenta.toLocaleDateString('en-CA'),
+          ziScurt: ZILE_SCURT[dataCurenta.getDay()],
+          dataText: dataCurenta.getDate() + ' ' + LUNI[dataCurenta.getMonth()]
         });
       }
 
       return zile;
+    }
+
+    function seteazaButoaneLuni() {
+      const azi = new Date();
+      const lunaCurenta = new Date(azi.getFullYear(), azi.getMonth(), 1);
+      const lunaUrmatoare = new Date(azi.getFullYear(), azi.getMonth() + 1, 1);
+
+      const btnCurenta = document.getElementById('btnLunaCurenta');
+      const btnUrmatoare = document.getElementById('btnLunaUrmatoare');
+
+      if (btnCurenta) {
+        btnCurenta.textContent = LUNI_BUTOANE[lunaCurenta.getMonth()];
+        btnCurenta.classList.toggle('active', lunaSelectataOffset === 0);
+      }
+
+      if (btnUrmatoare) {
+        btnUrmatoare.textContent = LUNI_BUTOANE[lunaUrmatoare.getMonth()];
+        btnUrmatoare.classList.toggle('active', lunaSelectataOffset === 1);
+      }
+    }
+
+    function schimbaLuna(offset) {
+      lunaSelectataOffset = offset;
+      renderOrar();
     }
 
     /* BLOC 9 - INTERVALE ORARE */
@@ -531,6 +599,10 @@
       const zile = getDays();
       const slots = getSlots();
       const programari = await getProgramari();
+
+      seteazaButoaneLuni();
+      grid.style.gridTemplateColumns = '74px repeat(' + zile.length + ', 76px)';
+      grid.style.minWidth = (74 + (zile.length * 76)) + 'px';
 
       let html = '';
 
