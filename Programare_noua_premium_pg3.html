@@ -1043,6 +1043,22 @@
       padding-bottom: 2px;
       flex-shrink: 0;
       scrollbar-width: thin;
+      scrollbar-color: #000000 #f4c363;
+    }
+
+    .days-row::-webkit-scrollbar {
+      height: 8px;
+    }
+
+    .days-row::-webkit-scrollbar-track {
+      background: linear-gradient(145deg, #f6d257, #a96f10);
+      border-radius: 10px;
+    }
+
+    .days-row::-webkit-scrollbar-thumb {
+      background: #000000;
+      border-radius: 10px;
+      border: 1px solid #f4c363;
     }
 
     .day-card {
@@ -1572,8 +1588,11 @@
     function getOcupatePentruZi() {
       var ocupate = (ocupatePeZile[ziSelectataIndex] || []).slice();
 
-      if (ziSelectataIndex === 0) {
-        var acum = new Date();
+      var ziSelectata = zile[ziSelectataIndex];
+      var acum = new Date();
+      var aziIso = formatDateIso(acum);
+
+      if (ziSelectata && ziSelectata.dataIso === aziIso) {
         var minuteCurente = acum.getHours() * 60 + acum.getMinutes();
 
         sloturi.forEach(function(slot, index) {
