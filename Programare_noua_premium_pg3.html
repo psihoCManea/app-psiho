@@ -104,6 +104,103 @@
       background: #d4af37;
     }
 
+
+    /* BLOC CLIENT - CĂUTARE ȘI SELECTARE CLIENT ÎN PG3 */
+    .client-search-card {
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 16px;
+      padding: 12px;
+      background: rgba(12, 24, 38, 0.88);
+      box-shadow: 0 12px 28px rgba(0,0,0,0.22);
+    }
+
+    .client-search-label {
+      font-size: 14px;
+      color: #f4c363;
+      font-weight: 900;
+      margin-bottom: 7px;
+      text-transform: uppercase;
+    }
+
+    .client-search-input {
+      width: 100%;
+      height: 46px;
+      border-radius: 12px;
+      border: 1px solid rgba(244,195,99,0.65);
+      background: #080808;
+      color: #fff;
+      font-size: 18px;
+      font-weight: 800;
+      padding: 0 12px;
+      outline: none;
+    }
+
+    .client-results {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      max-height: 105px;
+      overflow-y: auto;
+      margin-top: 8px;
+    }
+
+    .client-result-card {
+      border: 1px solid rgba(244,195,99,0.75);
+      border-radius: 12px;
+      background: linear-gradient(145deg, #1a1a1a, #070707);
+      padding: 9px 10px;
+      color: white;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .client-result-name {
+      font-size: 15px;
+      font-weight: 900;
+      line-height: 1.1;
+    }
+
+    .client-result-phone {
+      font-size: 12px;
+      color: #f4c363;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .client-selected-box {
+      margin-top: 8px;
+      border: 1px solid rgba(244,195,99,0.85);
+      border-radius: 12px;
+      padding: 9px 10px;
+      background: linear-gradient(145deg, #3a2a08, #090909);
+      color: white;
+      text-align: center;
+    }
+
+    .client-selected-title {
+      font-size: 11px;
+      color: #f4c363;
+      font-weight: 900;
+      margin-bottom: 4px;
+      letter-spacing: 1px;
+    }
+
+    .client-selected-name {
+      font-size: 18px;
+      font-weight: 900;
+      line-height: 1.1;
+    }
+
+    .client-selected-phone {
+      font-size: 14px;
+      color: #f4c363;
+      font-weight: 900;
+      margin-top: 3px;
+    }
+
     .info-card {
       border: 1px solid rgba(255,255,255,0.14);
       border-radius: 16px;
@@ -852,6 +949,62 @@
   }
 }
 
+
+    @media (max-width: 520px) {
+      .client-search-card {
+        padding: 8px;
+        border-radius: 12px;
+      }
+
+      .client-search-label {
+        font-size: 12px;
+        margin-bottom: 5px;
+      }
+
+      .client-search-input {
+        height: 38px;
+        font-size: 15px;
+        border-radius: 10px;
+      }
+
+      .client-results {
+        max-height: 75px;
+        gap: 5px;
+        margin-top: 6px;
+      }
+
+      .client-result-card {
+        padding: 7px 8px;
+        border-radius: 10px;
+      }
+
+      .client-result-name {
+        font-size: 13px;
+      }
+
+      .client-result-phone {
+        font-size: 10px;
+      }
+
+      .client-selected-box {
+        padding: 7px 8px;
+        border-radius: 10px;
+        margin-top: 6px;
+      }
+
+      .client-selected-title {
+        font-size: 9px;
+      }
+
+      .client-selected-name {
+        font-size: 14px;
+      }
+
+      .client-selected-phone {
+        font-size: 11px;
+      }
+    }
+
 </style>
 
   <!-- BLOC SUPABASE - CONECTARE BAZĂ DE DATE -->
@@ -875,36 +1028,28 @@
         <div class="back-text">BACK</div>
       </div>
       <div class="title">Programare nouă</div>
-      <div class="subtitle">Alege ziua și ora</div>
+      <div class="subtitle">Client, zi și ora</div>
     </div>
 
     <div class="steps">
-      <div class="step">1</div>
+      <div class="step active">1</div>
       <div class="line"></div>
-      <div class="step">2</div>
+      <div class="step active">2</div>
       <div class="line"></div>
-      <div class="step active">3</div>
-      <div class="line"></div>
-      <div class="step">4</div>
+      <div class="step">3</div>
     </div>
 
-    <div class="info-card">
-      <div class="icon-circle">👤</div>
-      <div>
-        <div class="info-label">Client selectat</div>
-        <div class="info-value" id="clientName">Alexandru Popescu</div>
-      </div>
-    </div>
+    <!-- BLOC CLIENT - CĂUTARE ȘI SELECTARE CLIENT -->
+    <div class="client-search-card">
+      <div class="client-search-label">Caută client</div>
+      <input id="clientSearch" class="client-search-input" placeholder="Ex: Miha" oninput="searchClients()">
+      <div id="clientResults" class="client-results"></div>
 
-    <div class="info-card duration-card">
-      <div style="display:flex; align-items:center; gap:13px;">
-        <div class="icon-circle">◷</div>
-        <div>
-          <div class="info-label">Durată selectată</div>
-          <div class="info-value"><span id="durationText">60 minute</span></div>
-        </div>
+      <div class="client-selected-box">
+        <div class="client-selected-title">CLIENT SELECTAT</div>
+        <div class="client-selected-name" id="clientName">-</div>
+        <div class="client-selected-phone" id="clientPhone">-</div>
       </div>
-      <button class="change-btn" onclick="changeDuration()">Schimbă</button>
     </div>
 
     <div class="section-title">▣ Zile disponibile</div>
@@ -942,6 +1087,7 @@
     localStorage.setItem('programare_durata', '60');
     var sloturiNecesare = 1;
     var client = null;
+    var clienti = [];
     var ziSelectataIndex = 0;
     var oraSelectataIndex = null;
     var confirmata = false;
@@ -963,19 +1109,87 @@
 
     async function init() {
       try { client = JSON.parse(localStorage.getItem('programare_client') || 'null'); } catch(e) {}
-      if (!client) {
-        location.href = 'Programare_noua_premium_pg1.html';
-        return;
-      }
 
-      document.getElementById('clientName').textContent = client.nume || '-';
-      document.getElementById('durationText').textContent = durataSelectata + ' minute';
+      await loadClientsFromSupabase();
+
+      if (client) {
+        afiseazaClientSelectat(client);
+      }
 
       buildDynamicDays();
       await incarcaOcupateDinSupabase();
       renderDays();
       renderSlots();
       updateAvailabilityTitle();
+    }
+
+    /* BLOC CLIENT - CITIRE CLIENȚI DIN SUPABASE */
+    async function loadClientsFromSupabase() {
+      try {
+        const { data, error } = await supabaseClient
+          .from('clienti')
+          .select('id, nume, telefon')
+          .order('nume', { ascending: true });
+
+        if (error) {
+          console.log('EROARE CLIENTI SUPABASE:', error);
+          clienti = [];
+          return;
+        }
+
+        clienti = data || [];
+      } catch(e) {
+        console.log('EROARE INCARCARE CLIENTI:', e);
+        clienti = [];
+      }
+    }
+
+    /* BLOC CLIENT - CĂUTARE CLIENT */
+    function searchClients() {
+      const input = document.getElementById('clientSearch');
+      const box = document.getElementById('clientResults');
+      if (!input || !box) return;
+
+      const text = input.value.toLowerCase().trim();
+      box.innerHTML = '';
+
+      if (text.length < 2) return;
+
+      const gasiti = clienti.filter(function(c) {
+        return (c.nume || '').toLowerCase().includes(text);
+      }).slice(0, 8);
+
+      gasiti.forEach(function(c) {
+        const div = document.createElement('div');
+        div.className = 'client-result-card';
+        div.onclick = function() {
+          selectClient(c);
+        };
+
+        div.innerHTML =
+          '<div class="client-result-name">' + (c.nume || '') + '</div>' +
+          '<div class="client-result-phone">' + (c.telefon || '') + '</div>';
+
+        box.appendChild(div);
+      });
+    }
+
+    /* BLOC CLIENT - SELECTARE CLIENT */
+    function selectClient(c) {
+      client = c;
+      localStorage.setItem('programare_client', JSON.stringify(c));
+      afiseazaClientSelectat(c);
+
+      const box = document.getElementById('clientResults');
+      const input = document.getElementById('clientSearch');
+
+      if (box) box.innerHTML = '';
+      if (input) input.value = '';
+    }
+
+    function afiseazaClientSelectat(c) {
+      document.getElementById('clientName').textContent = c && c.nume ? c.nume : '-';
+      document.getElementById('clientPhone').textContent = c && c.telefon ? c.telefon : '-';
     }
 
     function buildDynamicDays() {
@@ -1291,6 +1505,15 @@
     }
 
     async function confirmAppointment() {
+      if (!client) {
+        document.getElementById('messageIcon').textContent = '!';
+        document.getElementById('messageIcon').style.borderColor = '#ff4040';
+        document.getElementById('messageIcon').style.color = '#ff4040';
+        document.getElementById('messageText').innerHTML =
+          '<span class="message-red">Alege clientul !</span>';
+        return;
+      }
+
       if (oraSelectataIndex === null) return;
 
       if (!intervalEsteLiber()) {
@@ -1363,7 +1586,7 @@
     }
 
     function goBack() {
-      window.location.href = 'Programare_noua_premium_pg2.html';
+      window.location.href = 'index_premium.html';
     }
 
     function goHome() {
@@ -1371,6 +1594,15 @@
     }
 
     function nextStep() {
+      if (!client) {
+        document.getElementById('messageIcon').textContent = '!';
+        document.getElementById('messageIcon').style.borderColor = '#ff4040';
+        document.getElementById('messageIcon').style.color = '#ff4040';
+        document.getElementById('messageText').innerHTML =
+          '<span class="message-red">Alege clientul !</span>';
+        return;
+      }
+
       if (!confirmata) {
         document.getElementById('messageIcon').textContent = '!';
         document.getElementById('messageIcon').style.borderColor = '#ff4040';
