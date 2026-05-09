@@ -1112,6 +1112,99 @@
       padding: 9px 12px !important;
     }
 
+
+    /* BLOC VIZUAL FINAL - CLIENT SELECTAT ȘI LUNI
+       Ajustări doar de aspect: aliniere nume/telefon, compactare verticală și butoane luni mai înalte. */
+    .client-selected-box {
+      padding: 5px 8px !important;
+      margin-top: 5px !important;
+      border-radius: 10px !important;
+      text-align: left !important;
+    }
+
+    .client-selected-title {
+      text-align: center !important;
+      font-size: 10px !important;
+      margin-bottom: 3px !important;
+      line-height: 1 !important;
+    }
+
+    .client-selected-row {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      line-height: 1.05;
+    }
+
+    .client-selected-name {
+      flex: 1;
+      min-width: 0;
+      text-align: left !important;
+      font-size: 14px !important;
+      line-height: 1.05 !important;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .client-selected-phone {
+      flex-shrink: 0;
+      text-align: right !important;
+      font-size: 11px !important;
+      line-height: 1.05 !important;
+      margin-top: 0 !important;
+      white-space: nowrap;
+    }
+
+    .section-title {
+      margin-top: 0 !important;
+      margin-bottom: -2px !important;
+    }
+
+    .month-buttons {
+      margin-top: 0 !important;
+      margin-bottom: 0 !important;
+    }
+
+    .month-btn {
+      height: 36px !important;
+      border-radius: 14px !important;
+      font-size: 12px !important;
+      padding: 0 10px !important;
+    }
+
+    @media (max-width: 520px), (min-width: 701px) {
+      .client-selected-box {
+        padding: 5px 8px !important;
+        margin-top: 5px !important;
+      }
+
+      .client-selected-title {
+        font-size: 9px !important;
+        margin-bottom: 3px !important;
+      }
+
+      .client-selected-name {
+        font-size: 13px !important;
+      }
+
+      .client-selected-phone {
+        font-size: 10px !important;
+      }
+
+      .section-title {
+        margin-top: 0 !important;
+        margin-bottom: -2px !important;
+      }
+
+      .month-btn {
+        height: 34px !important;
+        font-size: 11px !important;
+      }
+    }
+
 </style>
 
   <!-- BLOC SUPABASE - CONECTARE BAZĂ DE DATE -->
@@ -1154,8 +1247,10 @@
 
       <div class="client-selected-box">
         <div class="client-selected-title">CLIENT SELECTAT</div>
-        <div class="client-selected-name" id="clientName">-</div>
-        <div class="client-selected-phone" id="clientPhone">-</div>
+        <div class="client-selected-row">
+          <div class="client-selected-name" id="clientName">-</div>
+          <div class="client-selected-phone" id="clientPhone">-</div>
+        </div>
       </div>
     </div>
 
