@@ -460,7 +460,7 @@
 
     .confirm-sub {
       font-size: 15px;
-      font-weight: 600;
+      font-weight: 900;
       margin-top: 5px;
     }
 
@@ -682,7 +682,7 @@
       }
 
       .message-box {
-        min-height: 60px !important;
+        min-height: 90px !important;
         padding: 9px 10px;
         border-radius: 12px;
         gap: 8px;
@@ -909,7 +909,7 @@
   }
 
   .message-box {
-    min-height: 60px !important;
+    min-height: 90px !important;
     padding: 9px 10px;
     border-radius: 12px;
     gap: 8px;
@@ -1008,7 +1008,7 @@
     }
 
 
-    /* BLOC 60 ZILE - LUNI COMPACTE ȘI ZILE PE ORIZONTALĂ */
+    /* BLOC 90 ZILE - LUNI COMPACTE ȘI ZILE PE ORIZONTALĂ */
     .month-buttons {
       display: flex;
       justify-content: center;
@@ -1251,7 +1251,7 @@
 
     <div class="section-title">▣ Zile disponibile</div>
 
-    <!-- BLOC 60 ZILE - BUTOANE LUNI -->
+    <!-- BLOC 90 ZILE - BUTOANE LUNI -->
     <div class="month-buttons" id="monthButtons"></div>
 
     <div class="days-row" id="daysRow"></div>
@@ -1283,8 +1283,8 @@
   </div>
 
   <script>
-    var durataSelectata = 60;
-    localStorage.setItem('programare_durata', '60');
+    var durataSelectata = 90;
+    localStorage.setItem('programare_durata', '90');
     var sloturiNecesare = 1;
     var client = null;
     var clienti = [];
@@ -1409,7 +1409,7 @@
       document.getElementById('clientPhone').textContent = c && c.telefon ? c.telefon : '-';
     }
 
-    /* BLOC 60 ZILE - CONSTRUIRE ZILE ȘI LUNI DISPONIBILE */
+    /* BLOC 90 ZILE - CONSTRUIRE ZILE ȘI LUNI DISPONIBILE */
     function buildDynamicDays() {
       toateZilele = [];
       luniDisponibile = [];
@@ -1417,7 +1417,7 @@
 
       var azi = new Date();
 
-      for (var i = 0; i < 60; i++) {
+      for (var i = 0; i < 90; i++) {
         var d = new Date(azi);
         d.setDate(azi.getDate() + i);
 
@@ -1735,11 +1735,11 @@
       var aziIso = formatDateIso(acum);
 
       if (ziSelectata && ziSelectata.dataIso === aziIso) {
-        var minuteCurente = acum.getHours() * 60 + acum.getMinutes();
+        var minuteCurente = acum.getHours() * 90 + acum.getMinutes();
 
         sloturi.forEach(function(slot, index) {
           var parti = slot.split(':');
-          var minuteSlot = Number(parti[0]) * 60 + Number(parti[1]);
+          var minuteSlot = Number(parti[0]) * 90 + Number(parti[1]);
 
           if (minuteSlot < minuteCurente) {
             ocupate.push(index);
@@ -1758,9 +1758,9 @@
     }
 
     function getEndTime(startIndex) {
-      var totalMinutes = 8 * 60 + (startIndex * 60) + durataSelectata;
-      var h = Math.floor(totalMinutes / 60);
-      var m = totalMinutes % 60;
+      var totalMinutes = 8 * 90 + (startIndex * 90) + durataSelectata;
+      var h = Math.floor(totalMinutes / 90);
+      var m = totalMinutes % 90;
 
       return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
     }
@@ -1911,7 +1911,7 @@
       document.getElementById('messageIcon').textContent = 'i';
       document.getElementById('messageIcon').style.borderColor = '#f4c363';
       document.getElementById('messageIcon').style.color = '#f4c363';
-      document.getElementById('messageText').innerHTML = 'Durata este fixă: 60 minute.';
+      document.getElementById('messageText').innerHTML = 'Durata este fixă: 90 minute.';
     }
 
     function goBack() {
