@@ -1291,6 +1291,7 @@
     var ziSelectataIndex = 0;
     var oraSelectataIndex = null;
     var confirmata = false;
+    var programareDinOrar = null;
 
     var zile = [];
     var toateZilele = [];
@@ -1312,6 +1313,7 @@
 
     async function init() {
       try { client = JSON.parse(localStorage.getItem('programare_client') || 'null'); } catch(e) {}
+      try { programareDinOrar = JSON.parse(localStorage.getItem('programare_din_orar') || 'null'); } catch(e) {}
 
       await loadClientsFromSupabase();
 
@@ -1320,11 +1322,22 @@
       }
 
       buildDynamicDays();
+      aplicaSelectieDinOrar();
       renderMonthButtons();
       await incarcaOcupateDinSupabase();
       renderDays();
       renderSlots();
       updateAvailabilityTitle();
+
+      if (oraSelectataIndex !== null) {
+        if (intervalEsteLiber()) {
+          updateMessageFree();
+          setConfirmEnabled(true);
+        } else {
+          updateMessageOccupied();
+          setConfirmEnabled(false);
+        }
+      }
     }
 
     /* BLOC CLIENT - CITIRE CLIENȚI DIN SUPABASE */
@@ -1452,6 +1465,45 @@
       ziSelectataIndex = 0;
       oraSelectataIndex = null;
       confirmata = false;
+    }
+
+    /* BLOC ORAR - PRESELECTARE ZI ȘI ORĂ DIN ORAR */
+    function aplicaSelectieDinOrar() {
+      if (!programareDinOrar || !programareDinOrar.dataIso || !programareDinOrar.oraStart) return;
+
+      var indexZiGlobala = toateZilele.findIndex(function(zi) {
+        return zi.dataIso === programareDinOrar.dataIso;
+      });
+
+      if (indexZiGlobala === -1) return;
+
+      var ziGasita = toateZilele[indexZiGlobala];
+
+      var indexLuna = luniDisponibile.findIndex(function(luna) {
+        return luna.key === ziGasita.lunaKey;
+      });
+
+      if (indexLuna === -1) return;
+
+      lunaSelectataIndex = indexLuna;
+      seteazaZilePentruLuna();
+
+      var indexZiLocala = zile.findIndex(function(zi) {
+        return zi.dataIso === programareDinOrar.dataIso;
+      });
+
+      if (indexZiLocala !== -1) {
+        ziSelectataIndex = indexZiLocala;
+      }
+
+      var indexOra = sloturi.indexOf(programareDinOrar.oraStart);
+
+      if (indexOra !== -1) {
+        oraSelectataIndex = indexOra;
+      }
+
+      localStorage.removeItem('programare_din_orar');
+      programareDinOrar = null;
     }
 
     function renderMonthButtons() {
