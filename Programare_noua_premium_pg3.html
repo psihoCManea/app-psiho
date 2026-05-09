@@ -938,8 +938,9 @@
   </div>
 
   <script>
-    var durataSelectata = Number(localStorage.getItem('programare_durata') || 60);
-    var sloturiNecesare = durataSelectata / 30;
+    var durataSelectata = 60;
+    localStorage.setItem('programare_durata', '60');
+    var sloturiNecesare = 1;
     var client = null;
     var ziSelectataIndex = 0;
     var oraSelectataIndex = null;
@@ -952,13 +953,10 @@
     var luniTitlu = ['IANUARIE', 'FEBRUARIE', 'MARTIE', 'APRILIE', 'MAI', 'IUNIE', 'IULIE', 'AUGUST', 'SEPTEMBRIE', 'OCTOMBRIE', 'NOIEMBRIE', 'DECEMBRIE'];
 
     var sloturi = [
-      '08:00', '08:30', '09:00', '09:30',
-      '10:00', '10:30', '11:00', '11:30',
-      '12:00', '12:30', '13:00', '13:30',
-      '14:00', '14:30', '15:00', '15:30',
-      '16:00', '16:30', '17:00', '17:30',
-      '18:00', '18:30', '19:00', '19:30',
-      '20:00', '20:30', '21:00', '21:30'
+      '08:00', '09:00', '10:00', '11:00',
+      '12:00', '13:00', '14:00', '15:00',
+      '16:00', '17:00', '18:00', '19:00',
+      '20:00', '21:00'
     ];
 
     var ocupatePeZile = [[], [], [], [], [], [], []];
@@ -1221,7 +1219,7 @@
     }
 
     function getEndTime(startIndex) {
-      var totalMinutes = 8 * 60 + (startIndex * 30) + durataSelectata;
+      var totalMinutes = 8 * 60 + (startIndex * 60) + durataSelectata;
       var h = Math.floor(totalMinutes / 60);
       var m = totalMinutes % 60;
 
@@ -1358,7 +1356,10 @@
     }
 
     function changeDuration() {
-      window.location.href = 'Programare_noua_premium_pg2.html';
+      document.getElementById('messageIcon').textContent = 'i';
+      document.getElementById('messageIcon').style.borderColor = '#f4c363';
+      document.getElementById('messageIcon').style.color = '#f4c363';
+      document.getElementById('messageText').innerHTML = 'Durata este fixă: 60 minute.';
     }
 
     function goBack() {
