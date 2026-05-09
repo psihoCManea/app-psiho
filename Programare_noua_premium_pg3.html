@@ -1796,7 +1796,11 @@
       document.getElementById('messageIcon').textContent = 'i';
       document.getElementById('messageIcon').style.borderColor = '#f4c363';
       document.getElementById('messageIcon').style.color = '#f4c363';
+
+      var ziText = zile[ziSelectataIndex] ? zile[ziSelectataIndex].titlu : '';
+
       document.getElementById('messageText').innerHTML =
+        '<span class="message-red">' + ziText + '</span><br>' +
         '<span class="message-red">' + getIntervalText() + '</span><br>' +
         '<span class="message-green">Interval liber</span>';
     }
