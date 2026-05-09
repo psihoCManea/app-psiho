@@ -289,16 +289,18 @@
 
     .day-card.selected {
       border: 2px solid #f4c363;
+      background: linear-gradient(145deg, #f6d257, #a96f10);
+      color: #111;
+    }
+
+    .day-card.selected .day-name,
+    .day-card.selected .day-number,
+    .day-card.selected .day-month {
+      color: #111;
     }
 
     .day-card.selected::after {
-      content: "";
-      position: absolute;
-      bottom: -7px;
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background: #f4c363;
+      display: none;
     }
 
     .day-name {
