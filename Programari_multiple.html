@@ -1156,12 +1156,28 @@
 
         const nr = selectiiTemporare.length;
 
+        /* ===== SALVARE PROGRAMARI MULTIPLE PENTRU PG4 ===== */
+        const programariMultipleWhatsapp = programariDeSalvat.map(function(p) {
+          return {
+            ziText: p.data,
+            interval: p.ora_start + ' - ' + p.ora_final
+          };
+        });
+
+        localStorage.setItem('programari_multiple_whatsapp', JSON.stringify({
+          client: clientSelectat,
+          programari: programariMultipleWhatsapp
+        }));
+
         selectiiTemporare = [];
         inchideConfirmare();
 
         afiseazaMesaj('Programările au fost salvate: ' + nr + '.', 'ok');
 
         await renderOrar();
+
+        /* ===== DESCHIDERE PAGINA 4 ===== */
+        window.location.href = 'Programare_noua_premium_pg4.html';
 
       } catch(e) {
         console.log('EROARE SALVARE PROGRAMARI MULTIPLE:', e);
