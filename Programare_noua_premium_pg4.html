@@ -536,14 +536,13 @@ MODIFICARI:
     </div>
 
 
+
+
     <div class="info-card">
       <div class="icon-circle">👤</div>
       <div>
         <div class="info-label">Client selectat</div>
         <div class="info-value" id="clientName">-</div>
-      </div>
-    </div>
-
       </div>
     </div>
 
@@ -573,6 +572,7 @@ MODIFICARI:
 
     function init() {
 
+      /* ===== CITIRE CLIENT PENTRU PROGRAMARI MULTIPLE ===== */
       try {
         const multiple = JSON.parse(localStorage.getItem('programari_multiple_whatsapp') || 'null');
 
@@ -580,6 +580,17 @@ MODIFICARI:
           client = multiple.client;
         }
       } catch(e) {}
+
+      /* ===== CITIRE CLIENT PENTRU PROGRAMARE SIMPLA ===== */
+      if (!client) {
+        try {
+          const rezultat = JSON.parse(localStorage.getItem('programare_rezultat') || 'null');
+
+          if (rezultat && rezultat.client) {
+            client = rezultat.client;
+          }
+        } catch(e) {}
+      }
 
       if (!client) {
         try {
@@ -606,10 +617,10 @@ MODIFICARI:
     init();
     async function trimiteWhatsApp() {
 
+    /* ===== WHATSAPP PROGRAMARI MULTIPLE ===== */
     const multiple = JSON.parse(localStorage.getItem('programari_multiple_whatsapp') || 'null');
 
     if (multiple && multiple.programari && multiple.programari.length) {
-
       let lista = '';
 
       multiple.programari.forEach(function(p) {
@@ -625,13 +636,14 @@ Daca intervine vreo modificare, te rog sa ma anunti din timp.
 Multumesc!
 Cristian Manea`;
 
-      var telefon = (multiple.client.telefon || '').replace(/\D/g, '');
-      var url = 'https://wa.me/' + telefon + '?text=' + encodeURIComponent(mesaj);
+      var telefon = (multiple.client.telefon || "").replace(/\D/g, "");
+      var url = "https://wa.me/" + telefon + "?text=" + encodeURIComponent(mesaj);
 
-      window.open(url, '_blank');
+      window.open(url, "_blank");
       return;
     }
 
+    /* ===== WHATSAPP PROGRAMARE SIMPLA ===== */
     var data = JSON.parse(localStorage.getItem('programare_rezultat') || 'null');
 
     if (!data) {
@@ -661,644 +673,6 @@ Cristian Manea`;
         console.log('EROARE CONFIRMARE SUPABASE:', error);
       }
     }
-}!DOCTYPE html>
-<!--
-VERSIUNE: PG4_CONFIRM_COMUNICARE_v2
-DATA: 2026-05-01
-MODIFICARI:
-- pagina 4 identica vizual cu pg3 pentru header, pasi, card client si card durata
-- cercul 4 activ
-- BACK catre pg3
-- HOME catre index_premium
-- doua optiuni confirmare: verde WhatsApp / rosu nu trimite
--->
-<html>
-<head>
-  <base target="_top">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-
-  <style>
-    * { box-sizing: border-box; }
-
-    html, body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      min-height: 100%;
-      font-family: Arial, sans-serif;
-      background:
-        radial-gradient(circle at top center, rgba(170,120,20,0.75) 0%, rgba(40,28,8,0.95) 30%, #030303 72%),
-        linear-gradient(180deg, #080808 0%, #000 100%);
-      color: #fff;
-    }
-
-    body {
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-
-    .page {
-      min-height: 100vh;
-      padding: 22px 16px 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 13px;
-    }
-
-    .header {
-      text-align: center;
-      margin-bottom: 35px;
-    }
-
-    .title {
-      font-size: 42px;
-      font-weight: 900;
-      color: #f2c94c;
-    }
-
-    .subtitle {
-      margin-top: 20px;
-      font-size: 50px;
-      color: white;
-      font-weight: normal;
-    }
-
-    .nav-back {
-      position:absolute;
-      left:0;
-      top:-10px;
-      display:flex;
-      align-items:center;
-      gap:10px;
-      cursor:pointer;
-    }
-
-    .arrow {
-      font-size:90px;
-      font-weight:900;
-      color:#f2c94c;
-    }
-
-    .back-text {
-      color:red;
-      font-size:35px;
-      font-weight:900;
-      margin-top:22px;
-    }
-
-    .steps {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin: 30px 0;
-    }
-
-    .step {
-      width: 70px;
-      height: 70px;
-      border-radius: 50%;
-      border: 3px solid #d4af37;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 30px;
-      font-weight: bold;
-      color: #f5d37a;
-    }
-
-    .step.active {
-      background: #f2c94c;
-      color: #000;
-    }
-
-    .line {
-      width: 45px;
-      height: 3px;
-      background: #d4af37;
-    }
-
-    .info-card {
-      border: 1px solid rgba(255,255,255,0.14);
-      border-radius: 16px;
-      padding: 18px 18px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      background: rgba(12, 24, 38, 0.88);
-      box-shadow: 0 12px 28px rgba(0,0,0,0.22);
-    }
-
-    .info-card.duration-card {
-      justify-content: space-between;
-    }
-
-    .icon-circle {
-      width: 58px;
-      height: 58px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #ffe28a, #d99a35);
-      color: #071320;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 32px;
-      flex-shrink: 0;
-      font-weight: 900;
-    }
-
-    .info-label {
-      font-size: 21px;
-      color: rgba(255,255,255,0.72);
-      margin-bottom: 6px;
-      font-weight: 800;
-    }
-
-    .info-value {
-      font-size: 30px;
-      font-weight: 900;
-      color: #fff;
-      line-height: 1.05;
-    }
-
-    .choice-space {
-      height: 34px;
-      flex-shrink: 0;
-    }
-
-    .message-box {
-      border: 1px solid rgba(255,255,255,0.16);
-      border-radius: 16px;
-      padding: 20px 18px;
-      display: flex;
-      align-items: center;
-      gap: 13px;
-      min-height: 120px;
-      box-shadow: 0 12px 28px rgba(0,0,0,0.22);
-    }
-
-    .message-box.green {
-      background: #1fae4b;
-    }
-
-    .message-box.red {
-      background: #ff2020;
-    }
-
-    .message-icon {
-      width: 54px;
-      height: 54px;
-      border-radius: 50%;
-      border: 2px solid #000;
-      color: #000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 31px;
-      flex-shrink: 0;
-      font-weight: 900;
-    }
-
-    .whatsapp-icon {
-    width: 34px;
-    height: 34px;
-    filter: brightness(0);
-    }
-
-    .message-main {
-      font-size: 25px;
-      line-height: 1.08;
-      color: #000;
-      font-weight: 900;
-    }
-
-    .bottom-bar {
-      margin-top:auto;
-      display:flex;
-      justify-content:space-between;
-      gap:20px;
-    }
-
-    .box-btn {
-      flex:1;
-      height:110px;
-      border-radius:24px;
-      background: linear-gradient(145deg, #f6d257, #a96f10);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:36px;
-      font-weight:900;
-      color:#111;
-      cursor:pointer;
-    }
-
-    @media (max-width: 520px) {
-      .page {
-        min-height: 100svh;
-        padding: 12px 10px 10px;
-        gap: 7px;
-      }
-
-      .header {
-        margin-bottom: 8px;
-      }
-
-      .title {
-        font-size: 24px !important;
-      }
-
-      .subtitle {
-        margin-top: 6px !important;
-        font-size: 22px !important;
-      }
-
-      .nav-back {
-        top: -4px;
-        gap: 4px;
-      }
-
-      .arrow {
-        font-size: 42px !important;
-      }
-
-      .back-text {
-        font-size: 14px !important;
-        margin-top: 10px;
-      }
-
-      .steps {
-        margin: 6px 0 8px;
-      }
-
-      .step {
-        width: 34px;
-        height: 34px;
-        font-size: 16px;
-        border-width: 2px;
-      }
-
-      .line {
-        width: 22px;
-        height: 2px;
-      }
-
-      .info-card {
-        padding: 10px 12px;
-        border-radius: 14px;
-        gap: 10px;
-      }
-
-      .icon-circle {
-        width: 38px !important;
-        height: 38px !important;
-        font-size: 22px !important;
-      }
-
-      .info-label {
-        font-size: 14px !important;
-        margin-bottom: 3px;
-      }
-
-      .info-value {
-        font-size: 18px !important;
-      }
-
-      .choice-space {
-        height: 28px;
-      }
-
-      .message-box {
-        min-height: 66px !important;
-        padding: 10px 12px;
-        border-radius: 12px;
-        gap: 9px;
-      }
-
-      .message-icon {
-        width: 38px;
-        height: 38px;
-        font-size: 22px;
-      }
-
-      .whatsapp-icon {
-        width: 25px;
-        height: 25px;
-      }
-
-      .message-main {
-        font-size: 18px !important;
-        line-height: 1.08;
-      }
-
-      .bottom-bar {
-        gap: 10px;
-      }
-
-      .box-btn {
-        height: 48px;
-        border-radius: 13px;
-        font-size: 18px;
-      }
-    }
-  
-/* ===== SIMULARE TELEFON DESKTOP - IDENTIC PG2 ===== */
-@media (min-width: 701px) {
-
-  html, body {
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-  }
-
-  body {
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 0;
-    background: #000000;
-  }
-
-  .page {
-    position: relative;
-    width: 430px;
-    max-width: 430px;
-    height: 920px;
-    min-height: 920px;
-    max-height: 920px;
-    margin: 0 auto;
-    border-radius: 48px;
-    padding: 74px 16px 18px;
-    background:
-      linear-gradient(180deg, rgba(18,18,18,0.98) 0%, rgba(7,7,7,0.98) 100%);
-    border: 3px solid rgba(242,201,76,0.92);
-    box-shadow:
-      0 0 0 3px rgba(255,255,255,0.05),
-      0 0 0 12px #000000,
-      0 0 35px rgba(242,201,76,0.30),
-      0 45px 90px rgba(0,0,0,0.85);
-    overflow: hidden;
-    transform-origin: center center;
-    transform: scale(min(calc((100vw - 80px) / 430), calc((100vh - 80px) / 920)));
-    gap: 7px;
-  }
-
-  .page::before {
-    content: "";
-    position: absolute;
-    top: 22px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 170px;
-    height: 35px;
-    background: #000000;
-    border-radius: 28px;
-    z-index: 5;
-  }
-
-  .page::after {
-    content: "";
-    position: absolute;
-    top: 36px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 58px;
-    height: 7px;
-    background: #222222;
-    border-radius: 20px;
-    z-index: 6;
-  }
-
-  .header {
-    margin-bottom: 8px;
-  }
-
-  .title {
-    font-size: 24px !important;
-  }
-
-  .subtitle {
-    margin-top: 6px !important;
-    font-size: 22px !important;
-  }
-
-  .nav-back {
-    top: -4px;
-    gap: 4px;
-  }
-
-  .arrow {
-    font-size: 42px !important;
-  }
-
-  .back-text {
-    font-size: 14px !important;
-    margin-top: 10px;
-  }
-
-  .steps {
-    margin: 6px 0 8px;
-  }
-
-  .step {
-    width: 34px;
-    height: 34px;
-    font-size: 16px;
-    border-width: 2px;
-  }
-
-  .line {
-    width: 22px;
-    height: 2px;
-  }
-
-  .info-card {
-    padding: 10px 12px;
-    border-radius: 14px;
-    gap: 10px;
-  }
-
-  .icon-circle {
-    width: 38px !important;
-    height: 38px !important;
-    font-size: 22px !important;
-  }
-
-  .info-label {
-    font-size: 14px !important;
-    margin-bottom: 3px;
-  }
-
-  .info-value {
-    font-size: 18px !important;
-  }
-
-  .choice-space {
-    height: 28px;
-  }
-
-  .message-box {
-    min-height: 66px !important;
-    padding: 10px 12px;
-    border-radius: 12px;
-    gap: 9px;
-  }
-
-  .message-icon {
-    width: 38px;
-    height: 38px;
-    font-size: 22px;
-  }
-
-  .whatsapp-icon {
-    width: 25px;
-    height: 25px;
-  }
-
-  .message-main {
-    font-size: 18px !important;
-    line-height: 1.08;
-  }
-
-  .bottom-bar {
-    gap: 10px;
-  }
-
-  .box-btn {
-    height: 48px;
-    border-radius: 13px;
-    font-size: 18px;
-  }
-}
-
-</style>
-
-  <!-- BLOC SUPABASE - CONECTARE BAZĂ DE DATE -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <script>
-    const supabaseClient = window.supabase.createClient(
-      'https://ksdcstrnsnqvqyyitcol.supabase.co',
-      'sb_publishable_TDzH5gP2zi9jwmUVLlWrQA_p4TiPTZ_'
-    );
-  </script>
-
-</head>
-
-<body>
-  <div class="page">
-
-    <div class="header" style="position:relative;">
-      <div class="nav-back" onclick="goBack()">
-        <div class="arrow">«</div>
-        <div class="back-text">BACK</div>
-      </div>
-
-      <div class="title">Programare nouă</div>
-      <div class="subtitle">Trimite confirmare</div>
-    </div>
-
-
-    <div class="info-card">
-      <div class="icon-circle">👤</div>
-      <div>
-        <div class="info-label">Client selectat</div>
-        <div class="info-value" id="clientName">-</div>
-      </div>
-    </div>
-
-      </div>
-    </div>
-
-    <div class="choice-space"></div>
-
-    <div class="message-box green" onclick="trimiteWhatsApp()">
-      <div class="message-icon">
-        <img class="whatsapp-icon" src="https://upload.wikimedia.org/wikipedia/commons/5/5e/WhatsApp_icon.png">
-      </div>
-      <div class="message-main">Trimite confirmarea clientului pe Whatsapp</div>
-    </div>
-
-    <div class="message-box red" onclick="goHome()">
-      <div class="message-icon">✖</div>
-      <div class="message-main">Nu trimite confirmarea clientului pe Whatsapp</div>
-    </div>
-
-    <div class="bottom-bar">
-      <div class="box-btn" onclick="goHome()">⌂ HOME</div>
-    </div>
-
-  </div>
-
-  <script>
-    var durataSelectata = Number(localStorage.getItem('programare_durata') || 60);
-    var client = null;
-
-    function init() {
-
-      try {
-        const multiple = JSON.parse(localStorage.getItem('programari_multiple_whatsapp') || 'null');
-
-        if (multiple && multiple.client) {
-          client = multiple.client;
-        }
-      } catch(e) {}
-
-      if (!client) {
-        try {
-          client = JSON.parse(localStorage.getItem('programare_client') || 'null');
-        } catch(e) {}
-      }
-
-      if (!client) {
-        window.location.href = 'Programare_noua_premium_pg1.html';
-        return;
-      }
-
-      document.getElementById('clientName').textContent = client.nume || '-';
-    }
-
-    function goBack() {
-      window.location.href = 'Programare_noua_premium_pg3.html';
-    }
-
-    function goHome() {
-      window.location.href = 'index_premium.html';
-    }
-
-    init();
-    async function trimiteWhatsApp() {
-
-    var data = JSON.parse(localStorage.getItem('programare_rezultat') || 'null');
-
-    if (!data) {
-    alert("Nu există programare.");
-    return;
-    }
-
-  var mesaj =
-  `Buna,
-  Iti confirm programarea:
-  *${data.zi.titlu}, ${data.interval}*
-  Daca intervine ceva, te rog sa ma anunti din timp.
-  Multumesc!
-  Cristian Manea`;
-
-  var telefon = (client.telefon || "").replace(/\D/g, "");
-  var url = "https://wa.me/" + telefon + "?text=" + encodeURIComponent(mesaj);
-
-  window.open(url, "_blank");
-
-  if (data.id) {
-    const { error } = await supabaseClient
-      .from('programari')
-      .update({ confirmare_trimisa: true })
-      .eq('id', data.id);
-
-    if (error) {
-      console.log('EROARE CONFIRMARE SUPABASE:', error);
-    }
-  }
 }
   </script>
 </body>
