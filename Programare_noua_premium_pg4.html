@@ -619,10 +619,19 @@ MODIFICARI:
     return;
     }
 
+  /* ===== LINK CALENDAR TEST ===== */
+  var linkCalendar =
+  "https://calendar.google.com/calendar/render?action=TEMPLATE";
+
+  /* ===== MESAJ WHATSAPP ===== */
   var mesaj =
   `Buna,
   Iti confirm programarea:
   *${data.zi.titlu}, ${data.interval}*
+
+  Adauga programarea in Calendar:
+  ${linkCalendar}
+
   Daca intervine ceva, te rog sa ma anunti din timp.
   Multumesc!
   Cristian Manea`;
