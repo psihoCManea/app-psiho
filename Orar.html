@@ -197,6 +197,12 @@
       color: #f2c94c;
     }
 
+    /* BLOC PERSONAL - AGENDA PERSONALĂ ÎN ORAR */
+    .busy-personal {
+      background: rgba(255, 0, 0, 0.50);
+      color: #ffffff;
+    }
+
     /* BLOC 5B - TEXT CLIENT ÎN ORAR */
     .slot-text {
       display: -webkit-box;
@@ -532,7 +538,7 @@
 
         const { data: indisponibilitati, error: errorIndisponibilitati } = await supabaseClient
           .from('indisponibilitati')
-          .select('tip, data_start, data_final, ora_start, ora_final, mesaj, activa')
+          .select('tip, data_start, data_final, ora_start, ora_final, mesaj, activa, tip_special')
           .eq('activa', true);
 
         if (errorIndisponibilitati) {
@@ -547,7 +553,8 @@
                   dataIso: blocare.data_start
                 },
                 interval: blocare.ora_start + '-' + blocare.ora_final,
-                text: blocare.mesaj || 'Închis'
+                text: blocare.tip_special === 'personal' ? 'Personal' : (blocare.mesaj || 'Închis'),
+                tipSpecial: blocare.tip_special || ''
               });
             }
 
@@ -557,7 +564,8 @@
                   dataIso: blocare.data_start
                 },
                 interval: '08:00-22:00',
-                text: blocare.mesaj || 'Închis'
+                text: blocare.tip_special === 'personal' ? 'Personal' : (blocare.mesaj || 'Închis'),
+                tipSpecial: blocare.tip_special || ''
               });
             }
 
@@ -682,8 +690,9 @@
           const blocare = getBlocarePentruSlot(zi.dataIso, slot, programari);
           const ocupat = !!blocare;
           const programareInceputa = ocupat && esteProgramareInceputa(zi.dataIso, blocare);
-          const clasaCelula = ocupat ? (programareInceputa ? 'busy-past' : 'busy') : 'free';
-          const textCelula = ocupat ? (blocare.text || 'Ocupat') : 'Liber';
+          const estePersonal = ocupat && blocare.tipSpecial === 'personal';
+          const clasaCelula = ocupat ? (estePersonal ? 'busy-personal' : (programareInceputa ? 'busy-past' : 'busy')) : 'free';
+          const textCelula = ocupat ? (estePersonal ? 'Personal' : (blocare.text || 'Ocupat')) : 'Liber';
           if (ocupat) {
             html += `<div class="cell ${clasaCelula}"><div class="slot-text">${escapeHtml(textCelula)}</div></div>`;
           } else {
