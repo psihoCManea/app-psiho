@@ -285,8 +285,9 @@
 
     /* BLOC 9A - TEXT CURSIV AGENDA PERSONALĂ */
     .agenda-personala-info {
-      min-height: 31px;
-      border-radius: 6px;
+      width: 100%;
+      min-height: 58px;
+      border-radius: 7px;
       border: 1px solid #b98b18;
       background: linear-gradient(90deg, rgba(0,0,0,0.96), rgba(22,22,22,0.96), rgba(0,0,0,0.96));
       box-shadow:
@@ -296,16 +297,19 @@
       align-items: center;
       overflow: hidden;
       position: relative;
-      margin-top: -1px;
+      margin-top: 4px;
+      padding: 0 10px;
+      grid-column: 1 / -1;
     }
 
     .agenda-personala-track {
+      width: 100%;
       white-space: nowrap;
       display: inline-flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
       padding-left: 100%;
-      animation: slideText 13s linear infinite;
+      animation: slideText 16s linear infinite;
     }
 
     .agenda-personala-label {
