@@ -534,7 +534,9 @@
 
           if (!item.data || !item.ora_start) return false;
 
-          const dataOraTask = new Date(item.data + 'T' + item.ora_start + ':00');
+          const oraCurata = String(item.ora_start || '').slice(0, 5);
+
+          const dataOraTask = new Date(item.data + 'T' + oraCurata + ':00');
 
           const limitaStergere = new Date(dataOraTask.getTime() + (30 * 60 * 1000));
 
@@ -550,7 +552,7 @@
 
         listaFiltrata.forEach(function(item) {
 
-          const dataFormatata = formatDateForDisplay(item.data, item.ora_start);
+          const dataFormatata = formatDateForDisplay(item.data, String(item.ora_start || '').slice(0, 5));
 
           html +=
             '<div class="agenda-item">' +
