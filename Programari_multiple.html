@@ -1017,9 +1017,58 @@
       }
     }
 
-    function confirmareFinala() {
-      afiseazaMesaj('Pasul următor: salvare în Supabase.', 'ok');
-      inchideConfirmare();
+    async function confirmareFinala() {
+      if (!clientSelectat) {
+        afiseazaMesaj('Selectează mai întâi clientul.', 'error');
+        inchideConfirmare();
+        return;
+      }
+
+      if (!selectiiTemporare.length) {
+        afiseazaMesaj('Nu ai selectat nicio rezervare.', 'error');
+        inchideConfirmare();
+        return;
+      }
+
+      const programariDeSalvat = selectiiTemporare.map(function(s) {
+        return {
+          nume_client: clientSelectat.nume || '',
+          telefon: clientSelectat.telefon || '',
+          data: s.dataIso,
+          ora_start: s.oraStart,
+          ora_final: s.oraFinal,
+          status: 'noua',
+          reminder_trimis: false,
+          confirmare_trimisa: false
+        };
+      });
+
+      try {
+        const { error } = await supabaseClient
+          .from('programari')
+          .insert(programariDeSalvat);
+
+        if (error) {
+          console.log('EROARE SALVARE PROGRAMARI MULTIPLE:', error);
+          afiseazaMesaj('Eroare la salvarea programărilor.', 'error');
+          inchideConfirmare();
+          return;
+        }
+
+        const nr = selectiiTemporare.length;
+
+        selectiiTemporare = [];
+        inchideConfirmare();
+
+        afiseazaMesaj('Programările au fost salvate: ' + nr + '.', 'ok');
+
+        await renderOrar();
+
+      } catch(e) {
+        console.log('EROARE SALVARE PROGRAMARI MULTIPLE:', e);
+        afiseazaMesaj('Eroare la salvarea programărilor.', 'error');
+        inchideConfirmare();
+      }
     }
 
     function goHome() {
