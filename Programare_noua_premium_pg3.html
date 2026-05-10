@@ -1867,6 +1867,9 @@
 
       localStorage.setItem('programare_rezultat', JSON.stringify(programareNoua));
 
+      /* ===== RESET CLIENT SELECTAT DUPA CONFIRMARE ===== */
+      localStorage.removeItem('programare_client');
+
       /* BLOC SUPABASE - SALVARE PROGRAMARE */
       try {
         const { data, error } = await supabaseClient
