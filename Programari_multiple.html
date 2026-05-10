@@ -1169,6 +1169,11 @@
           programari: programariMultipleWhatsapp
         }));
 
+        /* ===== COMPATIBILITATE PG4 WHATSAPP ===== */
+        localStorage.setItem('programare_rezultat', JSON.stringify({
+          client: clientSelectat
+        }));
+
         selectiiTemporare = [];
         inchideConfirmare();
 
