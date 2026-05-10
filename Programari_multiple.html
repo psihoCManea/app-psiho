@@ -233,6 +233,32 @@
       background: rgba(0,0,0,0.22);
     }
 
+    /* ===== BLOC 4A - MESAJE ÎN PAGINĂ FĂRĂ ALERT ===== */
+    .app-message {
+      min-height: 42px;
+      border-radius: 12px;
+      border: 1px solid rgba(244,195,99,0.55);
+      background: rgba(10, 22, 36, 0.92);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 9px 10px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 900;
+      color: #f4c363;
+    }
+
+    .app-message.error {
+      color: #ff4040;
+      border-color: rgba(255,64,64,0.75);
+    }
+
+    .app-message.ok {
+      color: #58d45f;
+      border-color: rgba(88,212,95,0.75);
+    }
+
     /* ===== BLOC 5 - BUTOANE JOS ===== */
     .bottom-bar {
       display: flex;
@@ -381,7 +407,10 @@
       <div id="programariRows" style="display:flex;flex-direction:column;gap:10px;"></div>
     </div>
 
-    <!-- ===== BLOC HTML 4 - BUTOANE ===== -->
+    <!-- ===== BLOC HTML 4 - MESAJ INTERN ===== -->
+    <div id="appMessage" class="app-message">Selectează clientul, apoi zilele și orele.</div>
+
+    <!-- ===== BLOC HTML 5 - BUTOANE ===== -->
     <div class="bottom-bar">
       <button class="box-btn secondary" onclick="goHome()">HOME</button>
       <button class="box-btn" onclick="adaugaRand()">MORE</button>
@@ -458,11 +487,30 @@
 
       if (box) box.innerHTML = '';
       if (input) input.value = '';
+
+      afiseazaMesaj('Client selectat. Acum poți alege zilele și orele.', 'ok');
     }
 
-    /* ===== BLOC 12 - BUTOANE TEMPORARE ===== */
+    /* ===== BLOC 12 - MESAJE INTERNE FĂRĂ ALERT ===== */
+    function afiseazaMesaj(text, tip) {
+      const box = document.getElementById('appMessage');
+      if (!box) return;
+
+      box.className = 'app-message';
+
+      if (tip === 'error') {
+        box.classList.add('error');
+      }
+
+      if (tip === 'ok') {
+        box.classList.add('ok');
+      }
+
+      box.innerText = text;
+    }
+
     function mesajPasUrmator() {
-      alert('Pasul următor: adăugăm rânduri cu zi și oră.');
+      afiseazaMesaj('Pasul următor: salvăm programările.', 'ok');
     }
 
     function goHome() {
@@ -630,8 +678,14 @@
           '</div>';
 
         btn.onclick = function() {
+          if (!clientSelectat) {
+            afiseazaMesaj('Selectează mai întâi clientul.', 'error');
+            return;
+          }
+
           rand.ziSelectata = iso;
           rand.oraSelectata = null;
+          afiseazaMesaj('Ziua a fost selectată.', 'ok');
           renderRanduri();
         };
 
@@ -671,12 +725,18 @@
         btn.innerHTML = start + '<br>' + end;
 
         btn.onclick = function() {
+          if (!clientSelectat) {
+            afiseazaMesaj('Selectează mai întâi clientul.', 'error');
+            return;
+          }
+
           if (!rand.ziSelectata) {
-            alert('Alege ziua mai întâi.');
+            afiseazaMesaj('Alege ziua mai întâi.', 'error');
             return;
           }
 
           rand.oraSelectata = start;
+          afiseazaMesaj('Ora a fost selectată.', 'ok');
           renderRanduri();
         };
 
