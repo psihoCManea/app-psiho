@@ -282,6 +282,46 @@
       text-align: right;
     }
 
+
+    /* BLOC 9A - TEXT CURSIV AGENDA PERSONALĂ */
+    .agenda-personala-info {
+      min-height: 31px;
+      border-radius: 6px;
+      border: 1px solid #b98b18;
+      background: linear-gradient(90deg, rgba(0,0,0,0.96), rgba(22,22,22,0.96), rgba(0,0,0,0.96));
+      box-shadow:
+        inset 0 0 18px rgba(242,201,76,0.11),
+        0 0 10px rgba(0,0,0,0.50);
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+      position: relative;
+      margin-top: -1px;
+    }
+
+    .agenda-personala-track {
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding-left: 100%;
+      animation: slideText 13s linear infinite;
+    }
+
+    .agenda-personala-label {
+      color: #f2c94c;
+      font-size: 11px;
+      font-weight: 600;
+      font-style: italic;
+    }
+
+    .agenda-personala-text {
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 500;
+      font-style: italic;
+    }
+
     /* BLOC 10 - HOME */
     .footer-home {
       margin-top: auto;
@@ -589,7 +629,19 @@ const client = window.supabase.createClient(
             <div class="quick-main">AGENDA PERSONALĂ</div>
             <div class="quick-sub">Taskuri și programări personale</div>
           </div>
-          <div class="quick-tip">›</div>
+          
+        <!-- BLOC HTML 5A - TEXT CURSIV AGENDA PERSONALĂ -->
+        <div class="agenda-personala-info">
+          <div class="agenda-personala-track">
+            <div class="chevrons">»»»</div>
+            <div>
+              <span class="agenda-personala-label">Agenda personală:</span>
+              <span class="agenda-personala-text" id="agendaPersonalaText">Nu există taskuri viitoare</span>
+            </div>
+            <div class="chevrons">»»»</div>
+          </div>
+        </div>
+<div class="quick-tip">›</div>
         </div>
 
       </div>
@@ -812,6 +864,52 @@ const client = window.supabase.createClient(
   </script>
 
 
+  <!-- BLOC 17B - TEXT CURSIV AGENDA PERSONALĂ DIN SUPABASE -->
+  <script>
+    async function loadAgendaPersonalaText() {
+      try {
+        const azi = getDateIsoIndex(0);
+        const el = document.getElementById('agendaPersonalaText');
+        if (!el) return;
+
+        const { data: lista, error } = await client
+          .from('agenda_personala')
+          .select('*')
+          .gte('data', azi)
+          .order('data', { ascending: true })
+          .order('ora_start', { ascending: true })
+          .limit(3);
+
+        if (error) {
+          console.log('EROARE AGENDA PERSONALA:', error);
+          el.innerText = 'Nu se pot citi taskurile personale';
+          return;
+        }
+
+        if (!lista || !lista.length) {
+          el.innerText = 'Nu există taskuri viitoare';
+          return;
+        }
+
+        const zile = ['Duminică', 'Luni', 'Marți', 'Miercuri', 'Joi', 'Vineri', 'Sâmbătă'];
+
+        const texte = lista.map(function(task) {
+          const dataTask = new Date(task.data + 'T00:00:00');
+          const zi = zile[dataTask.getDay()];
+          const ora = (task.ora_start || '').slice(0, 5);
+          return (task.titlu || 'Task') + ' — ' + zi + ' ' + ora;
+        });
+
+        el.innerText = texte.join('   •   ');
+      } catch(e) {
+        console.log('EROARE TEXT AGENDA PERSONALA:', e);
+        const el = document.getElementById('agendaPersonalaText');
+        if (el) el.innerText = 'Nu se pot citi taskurile personale';
+      }
+    }
+  </script>
+
+
   <!-- BLOC 18A - AUTOSCALING DESKTOP PENTRU CADRUL DE TELEFON -->
   <script>
     function ajusteazaTelefonDesktop() {
@@ -842,6 +940,7 @@ const client = window.supabase.createClient(
     loadUrmatorulClientSupabase();
     loadNrReminderTrimisSupabase();
     loadNrConfirmariTrimis();
+    loadAgendaPersonalaText();
   </script>
 
 </body>
