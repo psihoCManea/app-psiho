@@ -350,7 +350,7 @@
 
         <div>
           <div class="field-label">Ora</div>
-          <input id="oraAgenda" class="field-input" type="time">
+          <input id="oraAgenda" class="field-input" type="text" placeholder="Ex: 09:30">
         </div>
       </div>
 
@@ -422,7 +422,14 @@
       }
 
       if (!ora) {
-        afiseazaMesaj('Alege ora.', 'error');
+        afiseazaMesaj('Completează ora.', 'error');
+        return;
+      }
+
+      const regexOra = /^([0-1][0-9]|2[0-3]):([0-5][0-9])$/;
+
+      if (!regexOra.test(ora)) {
+        afiseazaMesaj('Ora trebuie în format HH:MM', 'error');
         return;
       }
 
