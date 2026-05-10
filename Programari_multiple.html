@@ -439,6 +439,25 @@
       color: #ffffff;
     }
 
+    .confirm-row-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .modify-btn {
+      border: 1px solid rgba(242,201,76,0.85);
+      border-radius: 9px;
+      background: linear-gradient(145deg, #f6d257, #a96f10);
+      color: #111;
+      font-size: 11px;
+      font-weight: 900;
+      padding: 7px 10px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
     .confirm-buttons {
       display: flex;
       gap: 10px;
@@ -1000,8 +1019,11 @@
           '<div class="confirm-day">' +
           (index + 1) + '. ' + s.ziText +
           '</div>' +
-          '<div class="confirm-hour">' +
-          s.oraStart + ' - ' + s.oraFinal +
+          '<div class="confirm-row-bottom">' +
+            '<div class="confirm-hour">' +
+            s.oraStart + ' - ' + s.oraFinal +
+            '</div>' +
+            '<button class="modify-btn" onclick="modificaSelectie(' + index + ')">MODIFICĂ</button>' +
           '</div>';
 
         list.appendChild(div);
@@ -1015,6 +1037,33 @@
       if (overlay) {
         overlay.style.display = 'none';
       }
+    }
+
+    function modificaSelectie(index) {
+      const selectie = selectiiTemporare[index];
+
+      if (!selectie) {
+        afiseazaMesaj('Selecția nu a fost găsită.', 'error');
+        inchideConfirmare();
+        return;
+      }
+
+      const toateLunile = getLuniDisponibile();
+      const lunaCheie = selectie.dataIso.substring(0, 7);
+      const lunaIndex = toateLunile.findIndex(function(luna) {
+        const parti = luna.cheie.split('-');
+        const lunaNumar = String(Number(parti[1]) + 1).padStart(2, '0');
+        return parti[0] + '-' + lunaNumar === lunaCheie;
+      });
+
+      if (lunaIndex !== -1) {
+        lunaSelectataOffset = lunaIndex;
+      }
+
+      inchideConfirmare();
+      renderOrar();
+
+      afiseazaMesaj('Modifică selecția marcată Rezervat: apasă pe ea ca să o scoți, apoi alege altă oră.', 'ok');
     }
 
     async function confirmareFinala() {
