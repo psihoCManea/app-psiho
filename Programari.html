@@ -46,7 +46,7 @@
 
     .menu-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: 10px;
     }
 
@@ -400,8 +400,13 @@ const supabaseClient = window.supabase.createClient(
   <div class="page">
 
     <div class="header">
-      <div class="title">Programări</div>
+      <div class="title">Programări business</div>
       <div class="subtitle">Alege lista</div>
+
+<div style="display:flex; justify-content:center; gap:8px; margin-top:10px;">
+  <div class="menu-card active" id="btnBusiness" onclick="schimbaPagina('business')" style="width:160px;">Business</div>
+  <div class="menu-card" id="btnAgenda" onclick="schimbaPagina('agenda')" style="width:160px;">Agenda personală</div>
+</div>
     </div>
 
     <!-- BLOC HTML - SELECTARE LUNĂ DIN CELE 90 ZILE -->
@@ -413,7 +418,27 @@ const supabaseClient = window.supabase.createClient(
       <div class="menu-card" onclick="selectTab(this, 'toate')">Toate</div>
     </div>
 
+    
+<div id="pagesWrapper" style="display:flex; width:200%; transition:transform 0.35s ease;">
+
+  <div style="width:50%; padding-right:6px;">
     <div class="programari-list" id="programariList"></div>
+  </div>
+
+  <div style="width:50%; padding-left:6px; display:flex; flex-direction:column; gap:8px;">
+
+    <div class="menu-grid">
+      <div class="menu-card active agenda-tab" onclick="selectAgendaTab(this, 'azi')">Azi</div>
+      <div class="menu-card agenda-tab" onclick="selectAgendaTab(this, 'maine')">Mâine</div>
+      <div class="menu-card agenda-tab" onclick="selectAgendaTab(this, 'toate')">Toate</div>
+    </div>
+
+    <div class="programari-list" id="agendaListProgramari"></div>
+
+  </div>
+
+</div>
+
 
     <div class="bottom-bar">
       <div class="box-btn" onclick="goHome()">⌂ HOME</div>
@@ -903,11 +928,124 @@ Cristian Manea`
       }
 
       incarcaProgramari();
+    incarcaAgendaProgramari();
     }
 
-    /* BLOC 14 - PORNIRE PAGINĂ */
+    
+    /* BLOC 13A - PAGINI BUSINESS / AGENDA */
+    let agendaFiltruActiv = 'azi';
+
+    function schimbaPagina(pagina) {
+
+      const wrap = document.getElementById('pagesWrapper');
+
+      document.getElementById('btnBusiness').classList.remove('active');
+      document.getElementById('btnAgenda').classList.remove('active');
+
+      if (pagina === 'agenda') {
+        wrap.style.transform = 'translateX(-50%)';
+        document.getElementById('btnAgenda').classList.add('active');
+      } else {
+        wrap.style.transform = 'translateX(0)';
+        document.getElementById('btnBusiness').classList.add('active');
+      }
+    }
+
+    function selectAgendaTab(el, filtru) {
+
+      document.querySelectorAll('.agenda-tab').forEach(function(btn) {
+        btn.classList.remove('active');
+      });
+
+      el.classList.add('active');
+
+      agendaFiltruActiv = filtru;
+
+      incarcaAgendaProgramari();
+    }
+
+    async function incarcaAgendaProgramari() {
+
+      const lista = document.getElementById('agendaListProgramari');
+
+      if (!lista) return;
+
+      lista.innerHTML = '<div class="empty-card">Se încarcă...</div>';
+
+      const { data, error } = await supabaseClient
+        .from('agenda_personala')
+        .select('*')
+        .order('data', { ascending: true })
+        .order('ora_start', { ascending: true });
+
+      if (error) {
+        lista.innerHTML = '<div class="empty-card">Eroare agenda personală</div>';
+        return;
+      }
+
+      const acum = new Date();
+
+      const toate = (data || []).filter(function(item) {
+
+        if (!item.data || !item.ora_start) return false;
+
+        const oraCurata = String(item.ora_start).slice(0,5);
+
+        const dataTask = new Date(item.data + 'T' + oraCurata + ':00');
+
+        const limita = new Date(dataTask.getTime() + (30 * 60 * 1000));
+
+        return acum < limita;
+      });
+
+      const azi = getDateIso(0);
+      const maine = getDateIso(1);
+
+      let listaFinala = toate;
+
+      if (agendaFiltruActiv === 'azi') {
+        listaFinala = toate.filter(x => x.data === azi);
+      }
+
+      if (agendaFiltruActiv === 'maine') {
+        listaFinala = toate.filter(x => x.data === maine);
+      }
+
+      if (!listaFinala.length) {
+        lista.innerHTML = '<div class="empty-card">Nu există taskuri</div>';
+        return;
+      }
+
+      const zile = ['Duminică','Luni','Marți','Miercuri','Joi','Vineri','Sâmbătă'];
+
+      let html = '';
+
+      listaFinala.forEach(function(item) {
+
+        const d = new Date(item.data + 'T00:00:00');
+
+        const titluZi =
+          zile[d.getDay()] + ' ' +
+          String(d.getDate()).padStart(2,'0') + '-' +
+          String(d.getMonth() + 1).padStart(2,'0');
+
+        html += `
+          <div class="programare-card">
+            <div class="programare-text">
+              <div class="programare-nume">${item.titlu || '-'}</div>
+              <div class="programare-detalii">${titluZi} · ${String(item.ora_start || '').slice(0,5)}</div>
+            </div>
+          </div>
+        `;
+      });
+
+      lista.innerHTML = html;
+    }
+
+/* BLOC 14 - PORNIRE PAGINĂ */
     renderButoaneLuni();
     incarcaProgramari();
+    incarcaAgendaProgramari();
   
 /* BLOC 15 - TRIMITERE CONFIRMARE WHATSAPP */
 async function trimiteConfirmare(id) {
