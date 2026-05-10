@@ -588,8 +588,14 @@ MODIFICARI:
     var client = null;
 
     function init() {
+
+      /* ===== CITIRE CLIENT DIN PROGRAMARE SALVATA ===== */
       try {
-        client = JSON.parse(localStorage.getItem('programare_client') || 'null');
+        var rezultat = JSON.parse(localStorage.getItem('programare_rezultat') || 'null');
+
+        if (rezultat && rezultat.client) {
+          client = rezultat.client;
+        }
       } catch(e) {}
 
       if (!client) {
