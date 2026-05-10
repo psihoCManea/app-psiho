@@ -350,7 +350,12 @@
 
         <div>
           <div class="field-label">Ora</div>
-          <input id="oraAgenda" class="field-input" type="text" placeholder="Ex: 09:30">
+
+          <div style="display:flex; align-items:center; gap:6px;">
+            <input id="oraAgendaOra" class="field-input" type="text" maxlength="2" placeholder="09" style="text-align:center;">
+            <div style="font-size:22px; font-weight:900; color:#f2c94c;">:</div>
+            <input id="oraAgendaMinute" class="field-input" type="text" maxlength="2" placeholder="00" style="text-align:center;">
+          </div>
         </div>
       </div>
 
@@ -408,7 +413,10 @@
     async function salveazaAgenda() {
       const titlu = document.getElementById('titluAgenda').value.trim();
       const data = document.getElementById('dataAgenda').value;
-      const ora = document.getElementById('oraAgenda').value;
+      const oraVal = document.getElementById('oraAgendaOra').value.trim();
+      const minutVal = document.getElementById('oraAgendaMinute').value.trim();
+
+      const ora = oraVal + ':' + minutVal;
       const blocheaza = document.getElementById('blocheazaOrar').checked;
 
       if (!titlu) {
@@ -471,7 +479,8 @@
 
         document.getElementById('titluAgenda').value = '';
         document.getElementById('dataAgenda').value = '';
-        document.getElementById('oraAgenda').value = '';
+        document.getElementById('oraAgendaOra').value = '';
+        document.getElementById('oraAgendaMinute').value = '';
         document.getElementById('blocheazaOrar').checked = false;
 
         await incarcaAgenda();
