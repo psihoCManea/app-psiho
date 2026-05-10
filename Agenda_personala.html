@@ -451,7 +451,13 @@
             ora_start: ora
           }));
 
-          afiseazaMesaj('Task salvat. În pasul următor îl legăm de Indisponibilități.', 'ok');
+          afiseazaMesaj('Task salvat. Se deschide Indisponibilități.', 'ok');
+
+          setTimeout(function() {
+            window.location.href = 'Indisponibilitati_premium.html';
+          }, 600);
+
+          return;
         } else {
           afiseazaMesaj('Task personal salvat.', 'ok');
         }
