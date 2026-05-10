@@ -172,7 +172,10 @@
       padding: 10px;
       flex: 1;
       min-height: 220px;
+      max-height: 100%;
       overflow-y: auto;
+      padding-right: 4px;
+      scroll-behavior: smooth;
     }
 
     .list-title {
@@ -510,8 +513,8 @@
       const list = document.getElementById('agendaList');
       if (!list) return;
 
-      const azi = new Date();
-      const aziIso = new Date(azi.getFullYear(), azi.getMonth(), azi.getDate()).toLocaleDateString('en-CA');
+      const acum = new Date();
+      const aziIso = new Date(acum.getFullYear(), acum.getMonth(), acum.getDate()).toLocaleDateString('en-CA');
 
       try {
         const { data, error } = await supabaseClient
@@ -527,18 +530,32 @@
           return;
         }
 
-        if (!data || !data.length) {
+        const listaFiltrata = (data || []).filter(function(item) {
+
+          if (!item.data || !item.ora_start) return false;
+
+          const dataOraTask = new Date(item.data + 'T' + item.ora_start + ':00');
+
+          const limitaStergere = new Date(dataOraTask.getTime() + (30 * 60 * 1000));
+
+          return acum < limitaStergere;
+        });
+
+        if (!listaFiltrata.length) {
           list.innerHTML = '<div class="agenda-empty">Nu există taskuri viitoare.</div>';
           return;
         }
 
         let html = '';
 
-        data.forEach(function(item) {
+        listaFiltrata.forEach(function(item) {
+
+          const dataFormatata = formatDateForDisplay(item.data, item.ora_start);
+
           html +=
             '<div class="agenda-item">' +
               '<div class="agenda-item-title">' + escapeHtml(item.titlu || '') + '</div>' +
-              '<div class="agenda-item-date">' + escapeHtml(formatDateForDisplay(item.data, item.ora_start)) + '</div>' +
+              '<div class="agenda-item-date">' + escapeHtml(dataFormatata) + '</div>' +
             '</div>';
         });
 
@@ -566,6 +583,10 @@
     }
 
     incarcaAgenda();
+
+    setInterval(function() {
+      incarcaAgenda();
+    }, 60000);
   </script>
 </body>
 </html>
