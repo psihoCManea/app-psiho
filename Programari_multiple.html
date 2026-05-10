@@ -764,6 +764,7 @@
     function schimbaLuna(index) {
       lunaSelectataOffset = index;
       renderOrar();
+      reseteazaScrollOrar();
     }
 
     function pad(num) {
@@ -980,9 +981,9 @@
             const textCelula = blocare.text || 'Ocupat';
             html += `<div class="cell ${clasaCelula}"><div class="slot-text">${escapeHtml(textCelula)}</div></div>`;
           } else if (rezervat) {
-            html += `<div class="cell reserved" data-selectie="${zi.dataIso}_${slot.oraStart}" onclick="toggleSelectieTemporara('${zi.dataIso}', '${zi.ziScurt} ${zi.dataText}', '${slot.oraStart}', '${slot.oraFinal}')"><div class="slot-text">Rezervat</div></div>`;
+            html += `<div class="cell reserved" data-date="${zi.dataIso}" data-hour="${slot.oraStart}" onclick="toggleSelectieTemporara('${zi.dataIso}', '${zi.ziScurt} ${zi.dataText}', '${slot.oraStart}', '${slot.oraFinal}')"><div class="slot-text">Rezervat</div></div>`;
           } else {
-            html += `<div class="cell free" onclick="toggleSelectieTemporara('${zi.dataIso}', '${zi.ziScurt} ${zi.dataText}', '${slot.oraStart}', '${slot.oraFinal}')"><div class="slot-text">Liber</div></div>`;
+            html += `<div class="cell free" data-date="${zi.dataIso}" data-hour="${slot.oraStart}" onclick="toggleSelectieTemporara('${zi.dataIso}', '${zi.ziScurt} ${zi.dataText}', '${slot.oraStart}', '${slot.oraFinal}')"><div class="slot-text">Liber</div></div>`;
           }
         });
       });
@@ -992,17 +993,36 @@
 
     function scrollLaSelectie(dataIso, oraStart) {
       setTimeout(function() {
-        const celula = document.querySelector('[data-selectie="' + dataIso + '_' + oraStart + '"]');
         const wrapper = document.querySelector('.orar-wrapper');
+        if (!wrapper) return;
 
-        if (!celula || !wrapper) return;
+        const celule = document.querySelectorAll('[data-date][data-hour]');
+        let celula = null;
 
-        const left = celula.offsetLeft - 90;
-        const top = celula.offsetTop - 50;
+        celule.forEach(function(el) {
+          if (el.getAttribute('data-date') === dataIso && el.getAttribute('data-hour') === oraStart) {
+            celula = el;
+          }
+        });
+
+        if (!celula) return;
+
+        const left = celula.offsetLeft - wrapper.clientWidth / 2 + celula.clientWidth / 2;
+        const top = celula.offsetTop - wrapper.clientHeight / 2 + celula.clientHeight / 2;
 
         wrapper.scrollLeft = left > 0 ? left : 0;
         wrapper.scrollTop = top > 0 ? top : 0;
-      }, 350);
+      }, 500);
+    }
+
+    function reseteazaScrollOrar() {
+      setTimeout(function() {
+        const wrapper = document.querySelector('.orar-wrapper');
+        if (!wrapper) return;
+
+        wrapper.scrollLeft = 0;
+        wrapper.scrollTop = 0;
+      }, 250);
     }
 
     function gataSelectii() {
@@ -1058,7 +1078,7 @@
       }
     }
 
-    function modificaSelectie(index) {
+    async function modificaSelectie(index) {
       const selectie = selectiiTemporare[index];
 
       if (!selectie) {
@@ -1080,7 +1100,7 @@
       }
 
       inchideConfirmare();
-      renderOrar();
+      await renderOrar();
       scrollLaSelectie(selectie.dataIso, selectie.oraStart);
 
       afiseazaMesaj('Modifică selecția marcată Rezervat: apasă pe ea ca să o scoți, apoi alege altă oră.', 'ok');
