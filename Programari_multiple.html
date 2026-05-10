@@ -1157,10 +1157,10 @@
         const nr = selectiiTemporare.length;
 
         /* ===== SALVARE PROGRAMARI MULTIPLE PENTRU PG4 ===== */
-        const programariMultipleWhatsapp = programariDeSalvat.map(function(p) {
+        const programariMultipleWhatsapp = selectiiTemporare.map(function(s) {
           return {
-            ziText: p.data,
-            interval: p.ora_start + ' - ' + p.ora_final
+            ziText: s.ziText,
+            interval: s.oraStart + ' - ' + s.oraFinal
           };
         });
 
