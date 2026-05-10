@@ -373,10 +373,24 @@
     <!-- ===== BLOC HTML 3 - PROGRAMĂRI MULTIPLE ===== -->
     <div class="multi-card">
       <div class="multi-title">Programări de planificat</div>
+
       <div class="multi-info">
-        Aici vom adăuga rânduri cu zi și oră. Butonul More va crea rânduri noi.
+        Selectează luna, ziua și ora liberă.
       </div>
-      <div class="row-placeholder">Rând 1: zi + oră liberă</div>
+
+      <div class="row-placeholder">
+
+        <div style="margin-bottom:10px;font-size:12px;font-weight:900;color:#f4c363;">
+          PROGRAMARE 1
+        </div>
+
+        <div id="luniBox" style="display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:10px;"></div>
+
+        <div id="zileBox" style="display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:10px;"></div>
+
+        <div id="oreBox" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;"></div>
+
+      </div>
     </div>
 
     <!-- ===== BLOC HTML 4 - BUTOANE ===== -->
@@ -467,8 +481,187 @@
       window.location.href = 'index_premium.html';
     }
 
+
+    /* ===== BLOC 12A - SELECTARE LUNĂ / ZI / ORĂ ===== */
+    let lunaSelectata = null;
+    let ziSelectata = null;
+    let oraSelectata = null;
+
+    const LUNI = ['Ian','Feb','Mar','Apr','Mai','Iun','Iul','Aug','Sep','Oct','Noi','Dec'];
+
+    function buildLuni() {
+      const luniBox = document.getElementById('luniBox');
+      if (!luniBox) return;
+
+      luniBox.innerHTML = '';
+
+      const azi = new Date();
+      const luni = [];
+
+      for (let i = 0; i < 90; i++) {
+        const d = new Date();
+        d.setDate(azi.getDate() + i);
+
+        const key = d.getFullYear() + '-' + d.getMonth();
+
+        if (!luni.find(x => x.key === key)) {
+          luni.push({
+            key,
+            luna: d.getMonth(),
+            an: d.getFullYear()
+          });
+        }
+      }
+
+      luni.forEach(function(luna, index) {
+        const btn = document.createElement('div');
+
+        btn.style.minWidth = '72px';
+        btn.style.height = '40px';
+        btn.style.borderRadius = '10px';
+        btn.style.display = 'flex';
+        btn.style.alignItems = 'center';
+        btn.style.justifyContent = 'center';
+        btn.style.fontSize = '13px';
+        btn.style.fontWeight = '900';
+        btn.style.cursor = 'pointer';
+        btn.style.border = '1px solid #f4c363';
+
+        const activ = index === 0;
+
+        btn.style.background = activ ? '#f4c363' : '#080808';
+        btn.style.color = activ ? '#000000' : '#ffffff';
+
+        btn.innerText = LUNI[luna.luna];
+
+        btn.onclick = function() {
+          document.querySelectorAll('#luniBox div').forEach(x => {
+            x.style.background = '#080808';
+            x.style.color = '#ffffff';
+          });
+
+          btn.style.background = '#f4c363';
+          btn.style.color = '#000000';
+
+          lunaSelectata = luna;
+
+          buildZile();
+        };
+
+        luniBox.appendChild(btn);
+
+        if (index === 0) {
+          lunaSelectata = luna;
+        }
+      });
+
+      buildZile();
+    }
+
+    function buildZile() {
+      const zileBox = document.getElementById('zileBox');
+      if (!zileBox || !lunaSelectata) return;
+
+      zileBox.innerHTML = '';
+
+      const azi = new Date();
+
+      for (let i = 0; i < 90; i++) {
+        const d = new Date();
+        d.setDate(azi.getDate() + i);
+
+        if (
+          d.getMonth() !== lunaSelectata.luna ||
+          d.getFullYear() !== lunaSelectata.an
+        ) continue;
+
+        const btn = document.createElement('div');
+
+        btn.style.minWidth = '56px';
+        btn.style.height = '56px';
+        btn.style.borderRadius = '12px';
+        btn.style.display = 'flex';
+        btn.style.flexDirection = 'column';
+        btn.style.alignItems = 'center';
+        btn.style.justifyContent = 'center';
+        btn.style.cursor = 'pointer';
+        btn.style.border = '1px solid #f4c363';
+        btn.style.background = '#080808';
+        btn.style.color = '#ffffff';
+
+        btn.innerHTML =
+          '<div style="font-size:11px;font-weight:900;">' +
+          d.toLocaleDateString('ro-RO', { weekday:'short' }) +
+          '</div>' +
+          '<div style="font-size:16px;font-weight:900;">' +
+          d.getDate() +
+          '</div>';
+
+        btn.onclick = function() {
+          document.querySelectorAll('#zileBox div').forEach(x => {
+            x.style.background = '#080808';
+            x.style.color = '#ffffff';
+          });
+
+          btn.style.background = '#f4c363';
+          btn.style.color = '#000000';
+
+          ziSelectata = d;
+
+          buildOre();
+        };
+
+        zileBox.appendChild(btn);
+      }
+    }
+
+    function buildOre() {
+      const oreBox = document.getElementById('oreBox');
+      if (!oreBox) return;
+
+      oreBox.innerHTML = '';
+
+      for (let h = 8; h <= 21; h++) {
+        const start = String(h).padStart(2, '0') + ':00';
+        const end = String(h + 1).padStart(2, '0') + ':00';
+
+        const btn = document.createElement('div');
+
+        btn.style.height = '54px';
+        btn.style.borderRadius = '12px';
+        btn.style.display = 'flex';
+        btn.style.alignItems = 'center';
+        btn.style.justifyContent = 'center';
+        btn.style.textAlign = 'center';
+        btn.style.fontSize = '13px';
+        btn.style.fontWeight = '900';
+        btn.style.cursor = 'pointer';
+        btn.style.border = '1px solid #f4c363';
+        btn.style.background = '#080808';
+        btn.style.color = '#f4c363';
+
+        btn.innerHTML = start + '<br>' + end;
+
+        btn.onclick = function() {
+          document.querySelectorAll('#oreBox div').forEach(x => {
+            x.style.background = '#080808';
+            x.style.color = '#f4c363';
+          });
+
+          btn.style.background = '#f4c363';
+          btn.style.color = '#000000';
+
+          oraSelectata = start;
+        };
+
+        oreBox.appendChild(btn);
+      }
+    }
+
+
     /* ===== BLOC 13 - PORNIRE PAGINĂ ===== */
     loadClientsFromSupabase();
+    buildLuni();
   </script>
 </body>
 </html>
