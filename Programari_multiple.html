@@ -370,6 +370,81 @@
       border: 1px solid #f2c94c;
     }
 
+    
+    .confirm-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.82);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 18px;
+    }
+
+    .confirm-modal {
+      width: 100%;
+      max-width: 430px;
+      border-radius: 18px;
+      border: 1px solid rgba(242,201,76,0.8);
+      background: linear-gradient(180deg, #111111 0%, #050505 100%);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.75);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .confirm-title {
+      text-align: center;
+      font-size: 19px;
+      font-weight: 900;
+      color: #f2c94c;
+    }
+
+    .confirm-client {
+      text-align: center;
+      font-size: 13px;
+      font-weight: 900;
+      color: #ffffff;
+    }
+
+    .confirm-list {
+      max-height: 340px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .confirm-item {
+      border: 1px solid rgba(242,201,76,0.55);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.04);
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .confirm-day {
+      font-size: 13px;
+      font-weight: 900;
+      color: #f2c94c;
+    }
+
+    .confirm-hour {
+      font-size: 15px;
+      font-weight: 900;
+      color: #ffffff;
+    }
+
+    .confirm-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+
     @media (min-width: 701px) {
       html, body {
         width: 100%;
@@ -487,7 +562,24 @@
       <button class="box-btn" onclick="gataSelectii()">GATA</button>
     </div>
 
-  </div>
+  
+    <div id="confirmOverlay" class="confirm-overlay">
+      <div class="confirm-modal">
+
+        <div class="confirm-title">Verifică programările</div>
+
+        <div class="confirm-client" id="confirmClientName">-</div>
+
+        <div class="confirm-list" id="confirmList"></div>
+
+        <div class="confirm-buttons">
+          <button class="box-btn secondary" onclick="inchideConfirmare()">ÎNAPOI</button>
+          <button class="box-btn" onclick="confirmareFinala()">PROGRAMEAZĂ</button>
+        </div>
+
+      </div>
+    </div>
+
 
   <script>
     const ORA_START = 8;
@@ -890,13 +982,44 @@
         return;
       }
 
-      const text = selectiiTemporare
-        .map(function(s, index) {
-          return (index + 1) + '. ' + s.ziText + ' ' + s.oraStart + '-' + s.oraFinal;
-        })
-        .join(' | ');
+      const overlay = document.getElementById('confirmOverlay');
+      const list = document.getElementById('confirmList');
+      const client = document.getElementById('confirmClientName');
 
-      afiseazaMesaj('Selectate: ' + text, 'ok');
+      if (!overlay || !list || !client) return;
+
+      client.innerText = clientSelectat.nume || '-';
+
+      list.innerHTML = '';
+
+      selectiiTemporare.forEach(function(s, index) {
+        const div = document.createElement('div');
+        div.className = 'confirm-item';
+
+        div.innerHTML =
+          '<div class="confirm-day">' +
+          (index + 1) + '. ' + s.ziText +
+          '</div>' +
+          '<div class="confirm-hour">' +
+          s.oraStart + ' - ' + s.oraFinal +
+          '</div>';
+
+        list.appendChild(div);
+      });
+
+      overlay.style.display = 'flex';
+    }
+
+    function inchideConfirmare() {
+      const overlay = document.getElementById('confirmOverlay');
+      if (overlay) {
+        overlay.style.display = 'none';
+      }
+    }
+
+    function confirmareFinala() {
+      afiseazaMesaj('Pasul următor: salvare în Supabase.', 'ok');
+      inchideConfirmare();
     }
 
     function goHome() {
