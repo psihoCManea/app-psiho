@@ -352,7 +352,7 @@
           <div class="field-label">Ora</div>
 
           <div style="display:flex; align-items:center; gap:6px;">
-            <input id="oraAgendaOra" class="field-input" type="text" maxlength="2" placeholder="09" style="text-align:center;">
+            <input id="oraAgendaOra" class="field-input" type="text" maxlength="2" placeholder="09" style="text-align:center;" oninput="sariLaMinute()">
             <div style="font-size:22px; font-weight:900; color:#f2c94c;">:</div>
             <input id="oraAgendaMinute" class="field-input" type="text" maxlength="2" placeholder="00" style="text-align:center;">
           </div>
@@ -407,6 +407,20 @@
 
       const d = new Date(Number(parti[0]), Number(parti[1]) - 1, Number(parti[2]));
       return ZILE_TEXT[d.getDay()] + ' ' + Number(parti[2]) + ' ' + LUNI_TEXT[d.getMonth()] + ' ' + (oraStart || '');
+    }
+
+    /* ===== ORĂ - SARE AUTOMAT LA MINUTE ===== */
+    function sariLaMinute() {
+      const oraInput = document.getElementById('oraAgendaOra');
+      const minuteInput = document.getElementById('oraAgendaMinute');
+
+      if (!oraInput || !minuteInput) return;
+
+      oraInput.value = oraInput.value.replace(/\D/g, '').slice(0, 2);
+
+      if (oraInput.value.length === 2) {
+        minuteInput.focus();
+      }
     }
 
     /* ===== SALVARE AGENDA ===== */
