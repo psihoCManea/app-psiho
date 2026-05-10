@@ -290,6 +290,9 @@ let selectedEnd = null;
 let concediuStart = null;
 let concediuEnd = null;
 
+/* CONTEXT AGENDA PERSONALĂ */
+let agendaContext = null;
+
 function setActiveType(type) {
   selectedType = type;
 
@@ -596,7 +599,8 @@ async function saveData() {
       ora_start: oraStartSalvare,
       ora_final: oraFinalSalvare,
       mesaj: mesaj,
-      activa: true
+      activa: true,
+      tip_special: agendaContext ? 'personal' : null
     }]);
 
   if (error) {
@@ -616,9 +620,40 @@ function updateConcediuDates() {
 }
 
 
+
+/* PRECOMPLETARE DIN AGENDA PERSONALĂ */
+function preiaContextAgenda() {
+  try {
+    const raw = localStorage.getItem('agenda_blocare_context');
+
+    if (!raw) return;
+
+    agendaContext = JSON.parse(raw);
+
+    if (!agendaContext || !agendaContext.data) return;
+
+    selectedDate = agendaContext.data;
+
+    document.querySelectorAll('.day-btn').forEach(function(btn) {
+      btn.classList.remove('active');
+
+      if (btn.dataset.date === selectedDate) {
+        btn.classList.add('active');
+      }
+    });
+
+    updateSummary();
+
+  } catch(e) {
+    console.log('EROARE CONTEXT AGENDA:', e);
+  }
+}
+
 window.addEventListener('load', function() {
+
   buildDays();
   buildTimes();
+  preiaContextAgenda();
 
   document.getElementById('btnInterval').addEventListener('click', function() {
     setActiveType('interval');
