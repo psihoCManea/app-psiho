@@ -980,7 +980,7 @@
             const textCelula = blocare.text || 'Ocupat';
             html += `<div class="cell ${clasaCelula}"><div class="slot-text">${escapeHtml(textCelula)}</div></div>`;
           } else if (rezervat) {
-            html += `<div class="cell reserved" onclick="toggleSelectieTemporara('${zi.dataIso}', '${zi.ziScurt} ${zi.dataText}', '${slot.oraStart}', '${slot.oraFinal}')"><div class="slot-text">Rezervat</div></div>`;
+            html += `<div class="cell reserved" data-selectie="${zi.dataIso}_${slot.oraStart}" onclick="toggleSelectieTemporara('${zi.dataIso}', '${zi.ziScurt} ${zi.dataText}', '${slot.oraStart}', '${slot.oraFinal}')"><div class="slot-text">Rezervat</div></div>`;
           } else {
             html += `<div class="cell free" onclick="toggleSelectieTemporara('${zi.dataIso}', '${zi.ziScurt} ${zi.dataText}', '${slot.oraStart}', '${slot.oraFinal}')"><div class="slot-text">Liber</div></div>`;
           }
@@ -988,6 +988,21 @@
       });
 
       grid.innerHTML = html;
+    }
+
+    function scrollLaSelectie(dataIso, oraStart) {
+      setTimeout(function() {
+        const celula = document.querySelector('[data-selectie="' + dataIso + '_' + oraStart + '"]');
+        const wrapper = document.querySelector('.orar-wrapper');
+
+        if (!celula || !wrapper) return;
+
+        const left = celula.offsetLeft - 90;
+        const top = celula.offsetTop - 50;
+
+        wrapper.scrollLeft = left > 0 ? left : 0;
+        wrapper.scrollTop = top > 0 ? top : 0;
+      }, 350);
     }
 
     function gataSelectii() {
@@ -1000,6 +1015,10 @@
         afiseazaMesaj('Nu ai selectat nicio rezervare.', 'error');
         return;
       }
+
+      selectiiTemporare.sort(function(a, b) {
+        return (a.dataIso + ' ' + a.oraStart).localeCompare(b.dataIso + ' ' + b.oraStart);
+      });
 
       const overlay = document.getElementById('confirmOverlay');
       const list = document.getElementById('confirmList');
@@ -1049,11 +1068,11 @@
       }
 
       const toateLunile = getLuniDisponibile();
-      const lunaCheie = selectie.dataIso.substring(0, 7);
+
       const lunaIndex = toateLunile.findIndex(function(luna) {
-        const parti = luna.cheie.split('-');
-        const lunaNumar = String(Number(parti[1]) + 1).padStart(2, '0');
-        return parti[0] + '-' + lunaNumar === lunaCheie;
+        return getDaysForMonthKey(luna.cheie).some(function(zi) {
+          return zi.dataIso === selectie.dataIso;
+        });
       });
 
       if (lunaIndex !== -1) {
@@ -1062,8 +1081,15 @@
 
       inchideConfirmare();
       renderOrar();
+      scrollLaSelectie(selectie.dataIso, selectie.oraStart);
 
       afiseazaMesaj('Modifică selecția marcată Rezervat: apasă pe ea ca să o scoți, apoi alege altă oră.', 'ok');
+    }
+
+    function getDaysForMonthKey(lunaCheie) {
+      return getToateZilele90().filter(function(zi) {
+        return zi.lunaCheie === lunaCheie;
+      });
     }
 
     async function confirmareFinala() {
@@ -1078,6 +1104,10 @@
         inchideConfirmare();
         return;
       }
+
+      selectiiTemporare.sort(function(a, b) {
+        return (a.dataIso + ' ' + a.oraStart).localeCompare(b.dataIso + ' ' + b.oraStart);
+      });
 
       const programariDeSalvat = selectiiTemporare.map(function(s) {
         return {
