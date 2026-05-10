@@ -508,19 +508,26 @@
       }
     }
 
+    /* ===== DATĂ AZI FORMAT SIGUR YYYY-MM-DD ===== */
+    function getAziIsoAgenda() {
+      const d = new Date();
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      return yyyy + '-' + mm + '-' + dd;
+    }
+
     /* ===== ÎNCĂRCARE LISTĂ AGENDA ===== */
     async function incarcaAgenda() {
       const list = document.getElementById('agendaList');
       if (!list) return;
 
       const acum = new Date();
-      const aziIso = new Date(acum.getFullYear(), acum.getMonth(), acum.getDate()).toLocaleDateString('en-CA');
 
       try {
         const { data, error } = await supabaseClient
           .from('agenda_personala')
           .select('*')
-          .gte('data', aziIso)
           .order('data', { ascending: true })
           .order('ora_start', { ascending: true });
 
