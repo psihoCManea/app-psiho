@@ -313,7 +313,7 @@
     .agenda-personala-label {
       color: #f2c94c;
       font-size: 11px;
-      font-weight: 500;
+      font-weight: 900;
       font-style: italic;
     }
 
@@ -876,7 +876,7 @@ const client = window.supabase.createClient(
           .gte('data', azi)
           .order('data', { ascending: true })
           .order('ora_start', { ascending: true })
-          .limit(3);
+          .limit(20);
 
         if (error) {
           console.log('EROARE AGENDA PERSONALA:', error);
@@ -891,14 +891,32 @@ const client = window.supabase.createClient(
 
         const zile = ['Duminică', 'Luni', 'Marți', 'Miercuri', 'Joi', 'Vineri', 'Sâmbătă'];
 
-        const texte = lista.map(function(task) {
-          const dataTask = new Date(task.data + 'T00:00:00');
-          const zi = zile[dataTask.getDay()];
-          const ora = (task.ora_start || '').slice(0, 5);
-          return (task.titlu || 'Task') + ' — ' + zi + ' ' + ora;
+        const acum = new Date();
+
+        const taskValid = lista.find(function(task) {
+          if (!task.data || !task.ora_start) return false;
+
+          const startTask = new Date(task.data + 'T' + task.ora_start + ':00');
+          const diferentaMinute = (acum - startTask) / 60000;
+
+          return diferentaMinute < 30;
         });
 
-        el.innerText = texte.join('   •   ');
+        if (!taskValid) {
+          el.innerText = 'Nu există taskuri viitoare';
+          return;
+        }
+
+        const dataTask = new Date(taskValid.data + 'T00:00:00');
+        const zi = zile[dataTask.getDay()];
+        const ora = (taskValid.ora_start || '').slice(0, 5);
+
+        el.innerText =
+          (taskValid.titlu || 'Task') +
+          ' — ' +
+          zi +
+          ' ' +
+          ora;
       } catch(e) {
         console.log('EROARE TEXT AGENDA PERSONALA:', e);
         const el = document.getElementById('agendaPersonalaText');
