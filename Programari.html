@@ -1170,7 +1170,7 @@ Cristian Manea`
 
     /* BLOC 13B - ȘTERGERE TASK AGENDA PERSONALĂ + BLOCARE ORAR */
     async function confirmaStergereAgenda(idAgenda, dataAgenda, oraStartAgenda) {
-      const idFinal = /^[0-9]+$/.test(String(idAgenda)) ? Number(idAgenda) : String(idAgenda);
+      const idFinal = Number(idAgenda);
       const oraCurata = String(oraStartAgenda || '').slice(0,5);
 
       if (!idFinal) {
@@ -1190,16 +1190,29 @@ Cristian Manea`
       }
 
       /* Dezactivează blocarea personală din Orar, dacă există */
-      const { error: errorBlocare } = await supabaseClient
-        .from('indisponibilitati')
-        .update({ activa: false })
-        .eq('tip_special', 'personal')
-        .eq('activa', true)
-        .eq('data_start', dataAgenda)
-        .eq('ora_start', oraCurata);
+      try {
+        const { data: blocariPersonale, error: errorCautareBlocare } = await supabaseClient
+          .from('indisponibilitati')
+          .select('*')
+          .eq('tip_special', 'personal')
+          .eq('activa', true)
+          .eq('data_start', dataAgenda);
 
-      if (errorBlocare) {
-        console.log('EROARE STERGERE BLOCARE PERSONALĂ:', errorBlocare);
+        if (!errorCautareBlocare) {
+          const blocariDeSters = (blocariPersonale || []).filter(function(b) {
+            const oraBlocare = String(b.ora_start || '').slice(0,5);
+            return oraBlocare === oraCurata;
+          });
+
+          for (const blocare of blocariDeSters) {
+            await supabaseClient
+              .from('indisponibilitati')
+              .update({ activa: false })
+              .eq('id', blocare.id);
+          }
+        }
+      } catch(e) {
+        console.log('EROARE BLOCARE PERSONALĂ:', e);
       }
 
       stergereId = null;
