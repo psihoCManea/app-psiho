@@ -286,7 +286,7 @@
     /* BLOC 9A - TEXT CURSIV AGENDA PERSONALĂ */
     .agenda-personala-info {
       width: 100%;
-      min-height: 58px;
+      height: 31px;
       border-radius: 7px;
       border: 1px solid #b98b18;
       background: linear-gradient(90deg, rgba(0,0,0,0.96), rgba(22,22,22,0.96), rgba(0,0,0,0.96));
@@ -298,24 +298,22 @@
       overflow: hidden;
       position: relative;
       margin-top: 4px;
-      padding: 0 10px;
       grid-column: 1 / -1;
     }
 
     .agenda-personala-track {
-      width: 100%;
       white-space: nowrap;
       display: inline-flex;
       align-items: center;
-      gap: 10px;
+      gap: 4px;
       padding-left: 100%;
-      animation: slideText 16s linear infinite;
+      animation: slideText 12s linear infinite;
     }
 
     .agenda-personala-label {
       color: #f2c94c;
       font-size: 11px;
-      font-weight: 900;
+      font-weight: 500;
       font-style: italic;
     }
 
@@ -421,6 +419,7 @@
       .summary-card { min-height: 58px; }
       .quick-card { min-height: 49px; }
       .next-client { height: 34px; }
+      .agenda-personala-info { height: 34px; }
     }
 
     /* BLOC 12 - PC / TABLETĂ - inclus în cadrul de telefon desktop */
@@ -526,12 +525,10 @@ const client = window.supabase.createClient(
     <!-- BLOC HTML 4 - URMĂTORUL CLIENT -->
     <div class="next-client">
       <div class="next-track">
-        <div class="chevrons">»»»</div>
         <div class="next-text">
           <span class="next-red">Următorul client:</span>
           <span class="next-name" id="urmatorulClientText">Nu există programări active</span>
         </div>
-        <div class="chevrons">»»»</div>
       </div>
     </div>
 
@@ -637,15 +634,12 @@ const client = window.supabase.createClient(
         <!-- BLOC HTML 5A - TEXT CURSIV AGENDA PERSONALĂ -->
         <div class="agenda-personala-info">
           <div class="agenda-personala-track">
-            <div class="chevrons">»»»</div>
             <div>
               <span class="agenda-personala-label">Agenda personală:</span>
               <span class="agenda-personala-text" id="agendaPersonalaText">Nu există taskuri viitoare</span>
             </div>
-            <div class="chevrons">»»»</div>
           </div>
         </div>
-<div class="quick-tip">›</div>
         </div>
 
       </div>
@@ -882,7 +876,7 @@ const client = window.supabase.createClient(
           .gte('data', azi)
           .order('data', { ascending: true })
           .order('ora_start', { ascending: true })
-          .limit(1);
+          .limit(3);
 
         if (error) {
           console.log('EROARE AGENDA PERSONALA:', error);
@@ -897,32 +891,14 @@ const client = window.supabase.createClient(
 
         const zile = ['Duminică', 'Luni', 'Marți', 'Miercuri', 'Joi', 'Vineri', 'Sâmbătă'];
 
-        const acum = new Date();
-
-        const taskActiv = lista.find(function(task) {
-          if (!task.data || !task.ora_start) return false;
-
-          const startTask = new Date(task.data + 'T' + task.ora_start + ':00');
-          const diferentaMinute = (acum - startTask) / 60000;
-
-          return diferentaMinute < 0 || diferentaMinute < 30;
+        const texte = lista.map(function(task) {
+          const dataTask = new Date(task.data + 'T00:00:00');
+          const zi = zile[dataTask.getDay()];
+          const ora = (task.ora_start || '').slice(0, 5);
+          return (task.titlu || 'Task') + ' — ' + zi + ' ' + ora;
         });
 
-        if (!taskActiv) {
-          el.innerText = 'Nu există taskuri viitoare';
-          return;
-        }
-
-        const dataTask = new Date(taskActiv.data + 'T00:00:00');
-        const zi = zile[dataTask.getDay()];
-        const ora = (taskActiv.ora_start || '').slice(0, 5);
-
-        el.innerText =
-          (taskActiv.titlu || 'Task') +
-          ' — ' +
-          zi +
-          ' ' +
-          ora;
+        el.innerText = texte.join('   •   ');
       } catch(e) {
         console.log('EROARE TEXT AGENDA PERSONALA:', e);
         const el = document.getElementById('agendaPersonalaText');
