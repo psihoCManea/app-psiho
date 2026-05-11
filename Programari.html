@@ -1233,11 +1233,14 @@ async function trimiteConfirmare(id) {
   if (!p || !p.client || !p.client.telefon) return;
 
   const tel = p.client.telefon.replace(/[^0-9]/g, '');
+  const titluZi = getTitluZi(p);
+
   const mesaj = encodeURIComponent(
 `Buna,
-Reminder programare azi *${p.interval}*
-Daca intervine ceva, te rog sa ma anunti din timp!
-Multumesc
+Iti confirm programarea:
+*${titluZi}, ${p.interval}*
+Daca intervine ceva, te rog sa ma anunti din timp.
+Multumesc!
 Cristian Manea`
   );
 
