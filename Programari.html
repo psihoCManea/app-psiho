@@ -1132,15 +1132,72 @@ Cristian Manea`
           String(d.getDate()).padStart(2,'0') + '-' +
           String(d.getMonth() + 1).padStart(2,'0');
 
-        return `
-          <div class="programare-card">
-            <div class="programare-text">
-              <div class="programare-nume">${item.titlu || '-'}</div>
-              <div class="programare-detalii">${titluZi} · ${String(item.ora_start || '').slice(0,5)}</div>
+        const agendaKey = 'agenda_' + item.id;
+
+        const confirmareAgenda = String(stergereId) === String(agendaKey) ? `
+          <div class="confirm-delete-box">
+            <div class="confirm-delete-text">Confirmă ștergerea</div>
+            <div class="confirm-delete-actions">
+              <button class="confirm-small-btn ok" onclick="confirmaStergereAgenda('${item.id}', '${item.data}', '${String(item.ora_start || '').slice(0,5)}')">Confirm</button>
+              <button class="confirm-small-btn cancel" onclick="renuntaStergere()">Renunț</button>
             </div>
+          </div>
+        ` : '';
+
+        return `
+          <div>
+            <div class="programare-card">
+              <div class="programare-text">
+                <div class="programare-nume">${item.titlu || '-'}</div>
+                <div class="programare-detalii">${titluZi} · ${String(item.ora_start || '').slice(0,5)}</div>
+              </div>
+
+              <button class="delete-btn" onclick="cereStergere('${agendaKey}')">🗑</button>
+            </div>
+            ${confirmareAgenda}
           </div>
         `;
       }).join('');
+    }
+
+
+    /* BLOC 13B - ȘTERGERE TASK AGENDA PERSONALĂ + BLOCARE ORAR */
+    async function confirmaStergereAgenda(idAgenda, dataAgenda, oraStartAgenda) {
+      const idFinal = /^[0-9]+$/.test(String(idAgenda)) ? Number(idAgenda) : String(idAgenda);
+      const oraCurata = String(oraStartAgenda || '').slice(0,5);
+
+      if (!idFinal) {
+        console.log('ID INVALID AGENDA:', idAgenda);
+        return;
+      }
+
+      /* Șterge taskul personal din agenda_personala */
+      const { error: errorAgenda } = await supabaseClient
+        .from('agenda_personala')
+        .delete()
+        .eq('id', idFinal);
+
+      if (errorAgenda) {
+        console.log('EROARE STERGERE AGENDA:', errorAgenda);
+        return;
+      }
+
+      /* Dezactivează blocarea personală din Orar, dacă există */
+      const { error: errorBlocare } = await supabaseClient
+        .from('indisponibilitati')
+        .update({ activa: false })
+        .eq('tip_special', 'personal')
+        .eq('activa', true)
+        .eq('data_start', dataAgenda)
+        .eq('ora_start', oraCurata);
+
+      if (errorBlocare) {
+        console.log('EROARE STERGERE BLOCARE PERSONALĂ:', errorBlocare);
+      }
+
+      stergereId = null;
+      await incarcaAgendaProgramari();
+      await incarcaProgramari();
     }
 
 /* BLOC 14 - PORNIRE PAGINĂ */
