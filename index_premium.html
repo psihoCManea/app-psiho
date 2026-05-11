@@ -286,7 +286,7 @@
     /* BLOC 9A - TEXT CURSIV AGENDA PERSONALĂ */
     .agenda-personala-info {
       width: 100%;
-      height: 31px;
+      min-height: 58px;
       border-radius: 7px;
       border: 1px solid #b98b18;
       background: linear-gradient(90deg, rgba(0,0,0,0.96), rgba(22,22,22,0.96), rgba(0,0,0,0.96));
@@ -298,30 +298,31 @@
       overflow: hidden;
       position: relative;
       margin-top: 4px;
+      padding: 0 10px;
       grid-column: 1 / -1;
     }
 
     .agenda-personala-track {
+      width: 100%;
       white-space: nowrap;
       display: inline-flex;
       align-items: center;
-      gap: 4px;
+      gap: 10px;
       padding-left: 100%;
-      animation: slideText 12s linear infinite;
+      animation: slideText 16s linear infinite;
     }
 
     .agenda-personala-label {
       color: #f2c94c;
       font-size: 11px;
-      font-weight: 900;
+      font-weight: 600;
       font-style: italic;
     }
 
     .agenda-personala-text {
-      color: #ffffff;
+      color: #ff3333;
       font-size: 11px;
-      font-weight: 500;
-      font-style: italic;
+      font-weight: 900;
     }
 
     /* BLOC 10 - HOME */
@@ -419,7 +420,6 @@
       .summary-card { min-height: 58px; }
       .quick-card { min-height: 49px; }
       .next-client { height: 34px; }
-      .agenda-personala-info { height: 34px; }
     }
 
     /* BLOC 12 - PC / TABLETĂ - inclus în cadrul de telefon desktop */
@@ -489,7 +489,7 @@ const client = window.supabase.createClient(
           <div class="summary-link" style="display:none;">Vezi detalii <span class="arrow-tip">›</span></div>
         </div>
 
-        <div class="summary-card" onclick="location.href='Programari.html?tab=confirmari'" style="cursor:pointer;">
+        <div class="summary-card">
           <div class="summary-top">
             <svg class="summary-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
               <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
@@ -525,10 +525,12 @@ const client = window.supabase.createClient(
     <!-- BLOC HTML 4 - URMĂTORUL CLIENT -->
     <div class="next-client">
       <div class="next-track">
+        <div class="chevrons">»»»</div>
         <div class="next-text">
           <span class="next-red">Următorul client:</span>
           <span class="next-name" id="urmatorulClientText">Nu există programări active</span>
         </div>
+        <div class="chevrons">»»»</div>
       </div>
     </div>
 
@@ -634,12 +636,15 @@ const client = window.supabase.createClient(
         <!-- BLOC HTML 5A - TEXT CURSIV AGENDA PERSONALĂ -->
         <div class="agenda-personala-info">
           <div class="agenda-personala-track">
+            <div class="chevrons">»»»</div>
             <div>
               <span class="agenda-personala-label">Agenda personală:</span>
               <span class="agenda-personala-text" id="agendaPersonalaText">Nu există taskuri viitoare</span>
             </div>
+            <div class="chevrons">»»»</div>
           </div>
         </div>
+<div class="quick-tip">›</div>
         </div>
 
       </div>
@@ -876,7 +881,7 @@ const client = window.supabase.createClient(
           .gte('data', azi)
           .order('data', { ascending: true })
           .order('ora_start', { ascending: true })
-          .limit(20);
+          .limit(3);
 
         if (error) {
           console.log('EROARE AGENDA PERSONALA:', error);
@@ -889,42 +894,16 @@ const client = window.supabase.createClient(
           return;
         }
 
-        const acum = new Date();
-
-        const taskuriValide = (lista || []).filter(function(task) {
-          if (!task.data || !task.ora_start) return false;
-
-          const oraCurata = String(task.ora_start).slice(0,5);
-          const startTask = new Date(task.data + 'T' + oraCurata + ':00');
-          const limita = new Date(startTask.getTime() + (30 * 60 * 1000));
-
-          return acum < limita;
-        });
-
-        if (!taskuriValide.length) {
-          el.innerText = 'Nu există taskuri viitoare';
-          return;
-        }
-
-        taskuriValide.sort(function(a, b) {
-          const dataA = String(a.data || '') + ' ' + String(a.ora_start || '').slice(0,5);
-          const dataB = String(b.data || '') + ' ' + String(b.ora_start || '').slice(0,5);
-          return dataA.localeCompare(dataB);
-        });
-
-        const taskValid = taskuriValide[0];
-
         const zile = ['Duminică', 'Luni', 'Marți', 'Miercuri', 'Joi', 'Vineri', 'Sâmbătă'];
-        const dataTask = new Date(taskValid.data + 'T00:00:00');
-        const zi = zile[dataTask.getDay()];
-        const ora = String(taskValid.ora_start || '').slice(0,5);
 
-        el.innerText =
-          (taskValid.titlu || 'Task') +
-          ' — ' +
-          zi +
-          ' ' +
-          ora;
+        const texte = lista.map(function(task) {
+          const dataTask = new Date(task.data + 'T00:00:00');
+          const zi = zile[dataTask.getDay()];
+          const ora = (task.ora_start || '').slice(0, 5);
+          return (task.titlu || 'Task') + ' — ' + zi + ' ' + ora;
+        });
+
+        el.innerText = texte.join('   •   ');
       } catch(e) {
         console.log('EROARE TEXT AGENDA PERSONALA:', e);
         const el = document.getElementById('agendaPersonalaText');
