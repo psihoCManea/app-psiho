@@ -123,6 +123,15 @@ body {
   color: #000;
 }
 
+
+.time-btn.occupied {
+  background: rgba(0, 0, 0, 0.45);
+  color: rgba(242, 201, 76, 0.35);
+  border-color: rgba(242, 201, 76, 0.25);
+  cursor: not-allowed;
+}
+
+
 .field {
   width: 100%;
   border: 1px solid #f2c94c;
@@ -289,6 +298,7 @@ let selectedStart = null;
 let selectedEnd = null;
 let concediuStart = null;
 let concediuEnd = null;
+let oreOcupateZiSelectata = [];
 
 /* CONTEXT AGENDA PERSONALĂ */
 let agendaContext = null;
@@ -363,13 +373,16 @@ function buildDays() {
   }
 }
 
-function selectDay(el, dateValue) {
+async function selectDay(el, dateValue) {
   document.querySelectorAll('.day-btn').forEach(function(btn) {
     btn.classList.remove('active');
   });
 
   el.classList.add('active');
   selectedDate = dateValue;
+
+  await incarcaOreOcupatePentruZi(dateValue);
+  updateTimesOccupied();
   updateSummary();
 }
 
@@ -393,7 +406,55 @@ function buildTimes() {
   }
 }
 
+async function incarcaOreOcupatePentruZi(dateValue) {
+  oreOcupateZiSelectata = [];
+
+  if (!dateValue) return;
+
+  const { data, error } = await supabaseClient
+    .from('programari')
+    .select('ora_start, ora_final, status')
+    .eq('data', dateValue);
+
+  if (error) {
+    console.log('EROARE CITIRE ORE OCUPATE:', error);
+    return;
+  }
+
+  oreOcupateZiSelectata = (data || []).filter(function(p) {
+    return p.status !== 'stearsa';
+  }).map(function(p) {
+    return {
+      start: String(p.ora_start || '').slice(0,5),
+      final: String(p.ora_final || '').slice(0,5)
+    };
+  });
+}
+
+function oraEsteOcupata(timeValue) {
+  return oreOcupateZiSelectata.some(function(p) {
+    if (!p.start || !p.final) return false;
+    return timeValue >= p.start && timeValue < p.final;
+  });
+}
+
+function updateTimesOccupied() {
+  document.querySelectorAll('.time-btn').forEach(function(btn) {
+    const time = btn.dataset.time;
+
+    btn.classList.remove('occupied');
+
+    if (oraEsteOcupata(time)) {
+      btn.classList.add('occupied');
+    }
+  });
+}
+
 function selectTime(el, timeValue) {
+  if (el.classList.contains('occupied')) {
+    return;
+  }
+
   if (!selectedStart || (selectedStart && selectedEnd)) {
     selectedStart = timeValue;
     selectedEnd = null;
@@ -637,6 +698,10 @@ function preiaContextAgenda() {
       if (btn.dataset.date === selectedDate) {
         btn.classList.add('active');
       }
+    });
+
+    incarcaOreOcupatePentruZi(selectedDate).then(function() {
+      updateTimesOccupied();
     });
 
     updateSummary();
