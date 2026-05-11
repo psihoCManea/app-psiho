@@ -898,12 +898,19 @@ ${p.tipIndisponibilitate === 'concediu'
     /* BLOC 5 - CERERE ȘTERGERE PROGRAMARE */
     function cereStergere(id) {
       stergereId = id;
+
+      if (String(id).indexOf('agenda_') === 0) {
+        incarcaAgendaProgramari();
+        return;
+      }
+
       renderProgramari();
     }
 
     function renuntaStergere() {
       stergereId = null;
       renderProgramari();
+      incarcaAgendaProgramari();
     }
 
     /* BLOC 6 - ȘTERGERE LOGICĂ ÎN SUPABASE */
