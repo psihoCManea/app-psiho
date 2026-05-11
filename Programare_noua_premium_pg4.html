@@ -63,7 +63,7 @@ MODIFICARI:
     .nav-back {
       position:absolute;
       left:0;
-      top:-10px;
+      top:58px;
       display:flex;
       align-items:center;
       gap:10px;
@@ -250,7 +250,7 @@ MODIFICARI:
       }
 
       .nav-back {
-        top: -4px;
+        top: 16px;
         gap: 4px;
       }
 
@@ -420,7 +420,7 @@ MODIFICARI:
   }
 
   .nav-back {
-    top: -4px;
+    top: 16px;
     gap: 4px;
   }
 
@@ -617,6 +617,38 @@ MODIFICARI:
     init();
     async function trimiteWhatsApp() {
 
+    /* ===== WHATSAPP PROGRAMARE SIMPLA ===== */
+    var data = JSON.parse(localStorage.getItem('programare_rezultat') || 'null');
+
+    if (data && data.interval) {
+
+      var mesaj =
+`Buna,
+Iti confirm programarea:
+*${data.zi.titlu}, ${data.interval}*
+Daca intervine ceva, te rog sa ma anunti din timp.
+Multumesc!
+Cristian Manea`;
+
+      var telefon = (client.telefon || "").replace(/\D/g, "");
+      var url = "https://wa.me/" + telefon + "?text=" + encodeURIComponent(mesaj);
+
+      window.open(url, "_blank");
+
+      if (data.id) {
+        const { error } = await supabaseClient
+          .from('programari')
+          .update({ confirmare_trimisa: true })
+          .eq('id', data.id);
+
+        if (error) {
+          console.log('EROARE CONFIRMARE SUPABASE:', error);
+        }
+      }
+
+      return;
+    }
+
     /* ===== WHATSAPP PROGRAMARI MULTIPLE ===== */
     const multiple = JSON.parse(localStorage.getItem('programari_multiple_whatsapp') || 'null');
 
@@ -643,36 +675,9 @@ Cristian Manea`;
       return;
     }
 
-    /* ===== WHATSAPP PROGRAMARE SIMPLA ===== */
-    var data = JSON.parse(localStorage.getItem('programare_rezultat') || 'null');
+    return;
 
-    if (!data) {
-      return;
-    }
 
-    var mesaj =
-`Buna,
-Iti confirm programarea:
-*${data.zi.titlu}, ${data.interval}*
-Daca intervine ceva, te rog sa ma anunti din timp.
-Multumesc!
-Cristian Manea`;
-
-    var telefon = (client.telefon || "").replace(/\D/g, "");
-    var url = "https://wa.me/" + telefon + "?text=" + encodeURIComponent(mesaj);
-
-    window.open(url, "_blank");
-
-    if (data.id) {
-      const { error } = await supabaseClient
-        .from('programari')
-        .update({ confirmare_trimisa: true })
-        .eq('id', data.id);
-
-      if (error) {
-        console.log('EROARE CONFIRMARE SUPABASE:', error);
-      }
-    }
 }
   </script>
 </body>
