@@ -889,27 +889,35 @@ const client = window.supabase.createClient(
           return;
         }
 
-        const zile = ['Duminică', 'Luni', 'Marți', 'Miercuri', 'Joi', 'Vineri', 'Sâmbătă'];
-
         const acum = new Date();
 
-        const taskValid = lista.find(function(task) {
+        const taskuriValide = (lista || []).filter(function(task) {
           if (!task.data || !task.ora_start) return false;
 
-          const startTask = new Date(task.data + 'T' + task.ora_start + ':00');
-          const diferentaMinute = (acum - startTask) / 60000;
+          const oraCurata = String(task.ora_start).slice(0,5);
+          const startTask = new Date(task.data + 'T' + oraCurata + ':00');
+          const limita = new Date(startTask.getTime() + (30 * 60 * 1000));
 
-          return diferentaMinute < 30;
+          return acum < limita;
         });
 
-        if (!taskValid) {
+        if (!taskuriValide.length) {
           el.innerText = 'Nu există taskuri viitoare';
           return;
         }
 
+        taskuriValide.sort(function(a, b) {
+          const dataA = String(a.data || '') + ' ' + String(a.ora_start || '').slice(0,5);
+          const dataB = String(b.data || '') + ' ' + String(b.ora_start || '').slice(0,5);
+          return dataA.localeCompare(dataB);
+        });
+
+        const taskValid = taskuriValide[0];
+
+        const zile = ['Duminică', 'Luni', 'Marți', 'Miercuri', 'Joi', 'Vineri', 'Sâmbătă'];
         const dataTask = new Date(taskValid.data + 'T00:00:00');
         const zi = zile[dataTask.getDay()];
-        const ora = (taskValid.ora_start || '').slice(0, 5);
+        const ora = String(taskValid.ora_start || '').slice(0,5);
 
         el.innerText =
           (taskValid.titlu || 'Task') +
