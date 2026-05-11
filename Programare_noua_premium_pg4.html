@@ -631,7 +631,11 @@ Multumesc!
 Cristian Manea`;
 
       var telefon = (client.telefon || "").replace(/\D/g, "");
-      var url = "https://wa.me/" + telefon + "?text=" + encodeURIComponent(mesaj);
+      var isMobile = /Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent);
+
+      var url = isMobile
+        ? "https://wa.me/" + telefon + "?text=" + encodeURIComponent(mesaj)
+        : "https://web.whatsapp.com/send?phone=" + telefon + "&text=" + encodeURIComponent(mesaj);
 
       window.open(url, "_blank");
 
@@ -669,7 +673,11 @@ Multumesc!
 Cristian Manea`;
 
       var telefon = (multiple.client.telefon || "").replace(/\D/g, "");
-      var url = "https://wa.me/" + telefon + "?text=" + encodeURIComponent(mesaj);
+      var isMobile = /Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent);
+
+      var url = isMobile
+        ? "https://wa.me/" + telefon + "?text=" + encodeURIComponent(mesaj)
+        : "https://web.whatsapp.com/send?phone=" + telefon + "&text=" + encodeURIComponent(mesaj);
 
       window.open(url, "_blank");
       return;
