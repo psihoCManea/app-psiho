@@ -637,7 +637,7 @@ Cristian Manea`;
         ? "https://wa.me/" + telefon + "?text=" + encodeURIComponent(mesaj)
         : "https://web.whatsapp.com/send?phone=" + telefon + "&text=" + encodeURIComponent(mesaj);
 
-      window.open(url, "_blank");
+      window.location.href = url;
 
       if (data.id) {
         const { error } = await supabaseClient
