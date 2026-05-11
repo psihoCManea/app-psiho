@@ -1182,7 +1182,8 @@ Cristian Manea`
       const { error: errorAgenda } = await supabaseClient
         .from('agenda_personala')
         .delete()
-        .eq('id', idFinal);
+        .eq('id', idFinal)
+        .select();
 
       if (errorAgenda) {
         console.log('EROARE STERGERE AGENDA:', errorAgenda);
@@ -1214,6 +1215,8 @@ Cristian Manea`
       } catch(e) {
         console.log('EROARE BLOCARE PERSONALĂ:', e);
       }
+
+      alert('Task șters');
 
       stergereId = null;
       await incarcaAgendaProgramari();
