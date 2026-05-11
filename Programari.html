@@ -47,18 +47,25 @@
     .menu-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
+      gap: 8px;
+      width: 100%;
     }
 
     .month-grid {
-      margin-bottom: -8px;
+      margin-top: 10px;
+      margin-bottom: 4px;
+    }
+
+    #businessTabs {
+      grid-template-columns: repeat(3, 1fr);
+      margin-top: 8px;
+      margin-bottom: 8px;
     }
 
     .menu-card {
+      width: 100%;
       height: 45px;
       border-radius: 16px;
-      max-width: 210px;
-      margin: 0 auto;
       background: linear-gradient(145deg, #f6d257, #a96f10);
       display: flex;
       flex-direction: column;
@@ -235,9 +242,10 @@
 
 
     .top-switch {
-      display: flex;
-      justify-content: center;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
       gap: 8px;
+      width: 100%;
       margin-top: 10px;
     }
 
@@ -252,15 +260,16 @@
 
     .pages-wrapper {
       display: flex;
-      width: 200%;
+      width: 220%;
       flex: 1;
       min-height: 0;
+      gap: 9.1%;
       transition: transform 0.35s ease;
     }
 
     .page-panel {
-      width: 50%;
-      flex: 0 0 50%;
+      width: 45.45%;
+      flex: 0 0 45.45%;
       min-width: 0;
       display: flex;
       flex-direction: column;
@@ -390,6 +399,7 @@
     height: 42px;
     border-radius: 14px;
     font-size: 15px;
+    width: 100%;
   }
 
   .programari-list {
@@ -1000,7 +1010,7 @@ Cristian Manea`
       document.getElementById('btnAgenda').classList.remove('active');
 
       if (pagina === 'agenda') {
-        wrap.style.transform = 'translateX(-50%)';
+        wrap.style.transform = 'translateX(-54.55%)';
         document.getElementById('btnAgenda').classList.add('active');
         if (title) title.innerText = 'Agenda personală';
         incarcaAgendaProgramari();
