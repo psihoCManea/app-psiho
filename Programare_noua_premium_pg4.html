@@ -635,7 +635,7 @@ Cristian Manea`;
 
       var url = isMobile
         ? "https://wa.me/" + telefon + "?text=" + encodeURIComponent(mesaj)
-        : "https://web.whatsapp.com/send?phone=" + telefon + "&text=" + encodeURIComponent(mesaj);
+        : "whatsapp://send?phone=" + telefon + "&text=" + encodeURIComponent(mesaj);
 
       window.location.href = url;
 
@@ -677,9 +677,9 @@ Cristian Manea`;
 
       var url = isMobile
         ? "https://wa.me/" + telefon + "?text=" + encodeURIComponent(mesaj)
-        : "https://web.whatsapp.com/send?phone=" + telefon + "&text=" + encodeURIComponent(mesaj);
+        : "whatsapp://send?phone=" + telefon + "&text=" + encodeURIComponent(mesaj);
 
-      window.open(url, "_blank");
+      window.location.href = url;
       return;
     }
 
