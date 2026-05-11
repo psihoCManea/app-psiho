@@ -530,6 +530,61 @@
         z-index: 6;
       }
     }
+  
+    /* ===== POPUP PREMIUM EROARE CLIENT ===== */
+    .popup-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.78);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      padding: 20px;
+    }
+
+    .popup-overlay.show {
+      display: flex;
+    }
+
+    .popup-box {
+      width: 100%;
+      max-width: 330px;
+      border-radius: 20px;
+      border: 2px solid #f2c94c;
+      background: linear-gradient(180deg, #121212 0%, #050505 100%);
+      box-shadow: 0 0 35px rgba(242,201,76,0.25);
+      padding: 22px 18px;
+      text-align: center;
+    }
+
+    .popup-icon {
+      font-size: 48px;
+      color: #ff4040;
+      font-weight: 900;
+      margin-bottom: 10px;
+    }
+
+    .popup-text {
+      color: #ff4040;
+      font-size: 20px;
+      font-weight: 900;
+      line-height: 1.25;
+    }
+
+    .popup-ok-btn {
+      margin-top: 20px;
+      width: 100%;
+      height: 50px;
+      border: none;
+      border-radius: 15px;
+      background: linear-gradient(145deg, #f6d257, #a96f10);
+      color: #111;
+      font-size: 18px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
   </style>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -582,6 +637,15 @@
     </div>
 
   
+    <!-- ===== POPUP PREMIUM EROARE CLIENT ===== -->
+    <div class="popup-overlay" id="clientErrorPopup">
+      <div class="popup-box">
+        <div class="popup-icon">!</div>
+        <div class="popup-text">Selectează mai întâi clientul.</div>
+        <button class="popup-ok-btn" onclick="inchidePopupClient()">OK</button>
+      </div>
+    </div>
+
     <div id="confirmOverlay" class="confirm-overlay">
       <div class="confirm-modal">
 
@@ -918,9 +982,20 @@
       });
     }
 
+
+    function afiseazaPopupClient() {
+      const popup = document.getElementById('clientErrorPopup');
+      if (popup) popup.classList.add('show');
+    }
+
+    function inchidePopupClient() {
+      const popup = document.getElementById('clientErrorPopup');
+      if (popup) popup.classList.remove('show');
+    }
+
     function toggleSelectieTemporara(dataIso, ziText, oraStart, oraFinal) {
       if (!clientSelectat) {
-        afiseazaMesaj('Selectează mai întâi clientul.', 'error');
+        afiseazaPopupClient();
         return;
       }
 
