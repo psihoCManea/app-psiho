@@ -33,13 +33,9 @@
     }
 
     .header {
-      position: relative;
       text-align: center;
       margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
+      position: relative;
     }
 
     .title {
@@ -56,15 +52,13 @@
     }
 
     .nav-back {
+      position:absolute;
+      left:0;
+      top:38px;
       display:flex;
       align-items:center;
-      gap:4px;
+      gap:10px;
       cursor:pointer;
-      position:relative;
-      left:auto;
-      top:auto;
-      flex-shrink:0;
-      margin-top:28px;
     }
 
     .arrow {
@@ -1231,16 +1225,13 @@
 <body>
   <div class="page">
 
-    <div class="header">
+    <div class="header" style="position:relative;">
       <div class="nav-back" onclick="goBack()">
         <div class="arrow">«</div>
         <div class="back-text">BACK</div>
       </div>
-
-      <div>
-        <div class="title">Programare nouă</div>
-        <div class="subtitle">Client, zi și ora</div>
-      </div>
+      <div class="title">Programare nouă</div>
+      <div class="subtitle">Client, zi și ora</div>
     </div>
 
 
