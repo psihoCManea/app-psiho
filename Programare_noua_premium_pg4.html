@@ -572,29 +572,23 @@ MODIFICARI:
 
     function init() {
 
-      /* ===== CITIRE CLIENT PENTRU PROGRAMARI MULTIPLE ===== */
+      /* ===== CITIRE PROGRAMARE MULTIPLA ===== */
       try {
         const multiple = JSON.parse(localStorage.getItem('programari_multiple_whatsapp') || 'null');
 
-        if (multiple && multiple.client) {
+        if (multiple && multiple.client && multiple.programari && multiple.programari.length) {
           client = multiple.client;
         }
       } catch(e) {}
 
-      /* ===== CITIRE CLIENT PENTRU PROGRAMARE SIMPLA ===== */
+      /* ===== CITIRE PROGRAMARE SIMPLA ===== */
       if (!client) {
         try {
           const rezultat = JSON.parse(localStorage.getItem('programare_rezultat') || 'null');
 
-          if (rezultat && rezultat.client) {
+          if (rezultat && rezultat.client && rezultat.interval) {
             client = rezultat.client;
           }
-        } catch(e) {}
-      }
-
-      if (!client) {
-        try {
-          client = JSON.parse(localStorage.getItem('programare_client') || 'null');
         } catch(e) {}
       }
 
