@@ -488,6 +488,76 @@
   }
 }
 
+
+    /* ===== POPUP PREMIUM MESAJE ===== */
+    .popup-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.78);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      padding: 20px;
+    }
+
+    .popup-overlay.show {
+      display: flex;
+    }
+
+    .popup-box {
+      width: 100%;
+      max-width: 330px;
+      border-radius: 20px;
+      border: 2px solid #f2c94c;
+      background: linear-gradient(180deg, #121212 0%, #050505 100%);
+      box-shadow: 0 0 35px rgba(242,201,76,0.25);
+      padding: 22px 18px;
+      text-align: center;
+    }
+
+    .popup-icon {
+      font-size: 48px;
+      font-weight: 900;
+      margin-bottom: 10px;
+    }
+
+    .popup-icon.ok {
+      color: #58d45f;
+    }
+
+    .popup-icon.error {
+      color: #ff4040;
+    }
+
+    .popup-text {
+      color: #ffffff;
+      font-size: 20px;
+      font-weight: 900;
+      line-height: 1.25;
+    }
+
+    .popup-text.ok {
+      color: #58d45f;
+    }
+
+    .popup-text.error {
+      color: #ff4040;
+    }
+
+    .popup-ok-btn {
+      margin-top: 20px;
+      width: 100%;
+      height: 50px;
+      border: none;
+      border-radius: 15px;
+      background: linear-gradient(145deg, #f6d257, #a96f10);
+      color: #111;
+      font-size: 18px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -555,6 +625,15 @@ const supabaseClient = window.supabase.createClient(
 
   </div>
 
+    <!-- ===== POPUP PREMIUM MESAJE ===== -->
+    <div class="popup-overlay" id="premiumPopup">
+      <div class="popup-box">
+        <div class="popup-icon" id="premiumPopupIcon">!</div>
+        <div class="popup-text" id="premiumPopupText">Mesaj</div>
+        <button class="popup-ok-btn" onclick="inchidePopupPremium()">OK</button>
+      </div>
+    </div>
+
   <script>
     /* BLOC 1 - SETĂRI PROGRAMĂRI */
     var filtruActiv = 'azi';
@@ -565,6 +644,32 @@ const supabaseClient = window.supabase.createClient(
     var blocariOriginale = [];
 
     const LUNI_BUTOANE = ['Ianuarie', 'Februarie', 'Martie', 'Aprilie', 'Mai', 'Iunie', 'Iulie', 'August', 'Septembrie', 'Octombrie', 'Noiembrie', 'Decembrie'];
+
+
+    /* BLOC POPUP PREMIUM - MESAJE FĂRĂ ALERT BROWSER */
+    function afiseazaPopupPremium(text, tip) {
+      const popup = document.getElementById('premiumPopup');
+      const icon = document.getElementById('premiumPopupIcon');
+      const mesaj = document.getElementById('premiumPopupText');
+
+      if (!popup || !icon || !mesaj) return;
+
+      const esteOk = tip === 'ok';
+
+      icon.className = 'popup-icon ' + (esteOk ? 'ok' : 'error');
+      mesaj.className = 'popup-text ' + (esteOk ? 'ok' : 'error');
+
+      icon.textContent = esteOk ? '✓' : '!';
+      mesaj.textContent = text || '';
+
+      popup.classList.add('show');
+    }
+
+    function inchidePopupPremium() {
+      const popup = document.getElementById('premiumPopup');
+      if (popup) popup.classList.remove('show');
+    }
+
 
     /* BLOC 1A - LUNI DISPONIBILE PENTRU URMĂTOARELE 90 ZILE */
     function construiesteLuniDisponibile() {
@@ -930,7 +1035,7 @@ ${p.tipIndisponibilitate === 'concediu'
 
         if (error) {
           console.log('EROARE STERGERE BLOCARE SUPABASE:', error);
-          alert('Eroare ștergere blocare');
+          afiseazaPopupPremium('Eroare ștergere blocare', 'error');
           return;
         }
 
@@ -946,7 +1051,7 @@ ${p.tipIndisponibilitate === 'concediu'
 
       if (error) {
         console.log('EROARE STERGERE PROGRAMARE SUPABASE:', error);
-        alert('Eroare ștergere programare');
+        afiseazaPopupPremium('Eroare ștergere programare', 'error');
         return;
       }
 
@@ -1216,7 +1321,7 @@ Cristian Manea`
         console.log('EROARE BLOCARE PERSONALĂ:', e);
       }
 
-      alert('Task șters');
+      afiseazaPopupPremium('Task șters', 'ok');
 
       stergereId = null;
       await incarcaAgendaProgramari();
