@@ -883,7 +883,7 @@
 
         const { data: indisponibilitati, error: errorIndisponibilitati } = await supabaseClient
           .from('indisponibilitati')
-          .select('tip, data_start, data_final, ora_start, ora_final, mesaj, activa')
+          .select('tip, data_start, data_final, ora_start, ora_final, mesaj, activa, tip_special')
           .eq('activa', true);
 
         if (errorIndisponibilitati) {
@@ -896,7 +896,8 @@
               rezultat.push({
                 zi: { dataIso: blocare.data_start },
                 interval: blocare.ora_start + '-' + blocare.ora_final,
-                text: blocare.mesaj || 'Închis'
+                text: blocare.tip_special === 'personal' ? 'Personal' : (blocare.mesaj || 'Închis'),
+                tipSpecial: blocare.tip_special || ''
               });
             }
 
@@ -904,7 +905,8 @@
               rezultat.push({
                 zi: { dataIso: blocare.data_start },
                 interval: '08:00-22:00',
-                text: blocare.mesaj || 'Închis'
+                text: blocare.tip_special === 'personal' ? 'Personal' : (blocare.mesaj || 'Închis'),
+                tipSpecial: blocare.tip_special || ''
               });
             }
 
@@ -918,7 +920,8 @@
                 rezultat.push({
                   zi: { dataIso: iso },
                   interval: '08:00-22:00',
-                  text: blocare.mesaj || 'Concediu'
+                  text: blocare.tip_special === 'personal' ? 'Personal' : (blocare.mesaj || 'Concediu'),
+                  tipSpecial: blocare.tip_special || ''
                 });
               }
             }
@@ -1053,7 +1056,7 @@
 
           if (ocupat) {
             const clasaCelula = programareInceputa ? 'busy-past' : 'busy';
-            const textCelula = blocare.text || 'Ocupat';
+            const textCelula = blocare.tipSpecial === 'personal' ? 'Personal' : (blocare.text || 'Ocupat');
             html += `<div class="cell ${clasaCelula}"><div class="slot-text">${escapeHtml(textCelula)}</div></div>`;
           } else if (rezervat) {
             html += `<div class="cell reserved" data-date="${zi.dataIso}" data-hour="${slot.oraStart}" onclick="toggleSelectieTemporara('${zi.dataIso}', '${zi.ziScurt} ${zi.dataText}', '${slot.oraStart}', '${slot.oraFinal}')"><div class="slot-text">Rezervat</div></div>`;
