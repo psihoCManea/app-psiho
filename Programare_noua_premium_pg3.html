@@ -1364,8 +1364,8 @@
   </div>
 
   <script>
-    var durataSelectata = 90;
-    localStorage.setItem('programare_durata', '90');
+    var durataSelectata = 60;
+    localStorage.setItem('programare_durata', '60');
     var sloturiNecesare = 1;
     var client = null;
     var clienti = [];
@@ -1816,11 +1816,11 @@
       var aziIso = formatDateIso(acum);
 
       if (ziSelectata && ziSelectata.dataIso === aziIso) {
-        var minuteCurente = acum.getHours() * 90 + acum.getMinutes();
+        var minuteCurente = acum.getHours() * 60 + acum.getMinutes();
 
         sloturi.forEach(function(slot, index) {
           var parti = slot.split(':');
-          var minuteSlot = Number(parti[0]) * 90 + Number(parti[1]);
+          var minuteSlot = Number(parti[0]) * 60 + Number(parti[1]);
 
           if (minuteSlot < minuteCurente) {
             ocupate.push(index);
@@ -1839,9 +1839,9 @@
     }
 
     function getEndTime(startIndex) {
-      var totalMinutes = 8 * 90 + (startIndex * 90) + durataSelectata;
-      var h = Math.floor(totalMinutes / 90);
-      var m = totalMinutes % 90;
+      var totalMinutes = 8 * 60 + (startIndex * 60) + durataSelectata;
+      var h = Math.floor(totalMinutes / 60);
+      var m = totalMinutes % 60;
 
       return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
     }
@@ -2001,7 +2001,7 @@
       document.getElementById('messageIcon').textContent = 'i';
       document.getElementById('messageIcon').style.borderColor = '#f4c363';
       document.getElementById('messageIcon').style.color = '#f4c363';
-      document.getElementById('messageText').innerHTML = 'Durata este fixă: 90 minute.';
+      document.getElementById('messageText').innerHTML = 'Durata este fixă: 60 minute.';
     }
 
     function goBack() {
