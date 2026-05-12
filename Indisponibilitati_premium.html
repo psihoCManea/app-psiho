@@ -431,7 +431,7 @@ async function incarcaOreOcupatePentruZi(dateValue) {
   /* ===== BLOCARI EXISTENTE / PERSONAL ===== */
   const { data: blocari, error: errorBlocari } = await supabaseClient
     .from('indisponibilitati')
-    .select('ora_start, ora_final, data_start, data_final, activa')
+    .select('ora_start, ora_final, data_start, data_final, activa, tip_special')
     .eq('activa', true);
 
   if (!errorBlocari) {
@@ -452,13 +452,24 @@ async function incarcaOreOcupatePentruZi(dateValue) {
   updateTimesOccupied();
 }
 
+function timeToMinutes(t) {
+  if (!t || t.indexOf(':') === -1) return 0;
+  const parti = t.split(':');
+  return Number(parti[0]) * 60 + Number(parti[1]);
+}
+
 function oraEsteOcupata(timeValue) {
+
+  const minuteCurente = timeToMinutes(timeValue);
 
   return oreOcupateZiSelectata.some(function(p) {
 
     if (!p.start || !p.final) return false;
 
-    return timeValue >= p.start && timeValue < p.final;
+    const startMinute = timeToMinutes(p.start);
+    const finalMinute = timeToMinutes(p.final);
+
+    return minuteCurente >= startMinute && minuteCurente < finalMinute;
   });
 }
 
