@@ -1719,93 +1719,152 @@
       return true;
     }
 
-    /* BLOC SUPABASE - CITIRE SLOTURI OCUPATE */
+    /* BLOC SUPABASE - CITIRE SLOTURI OCUPATE
+       Folosește aceeași logică de bază ca Orar.html:
+       programări + indisponibilități + blocări Personal. */
+    var blocariUniversale = [];
+
     async function incarcaOcupateDinSupabase() {
       ocupatePeZile = zile.map(function() { return []; });
+      blocariUniversale = [];
 
       try {
+        if (!zile || !zile.length) return;
+
         var dateStart = zile[0].dataIso;
         var dateFinal = zile[zile.length - 1].dataIso;
+        var rezultat = [];
 
         const { data, error } = await supabaseClient
           .from('programari')
-          .select('data, ora_start, ora_final, status')
+          .select('*')
           .gte('data', dateStart)
           .lte('data', dateFinal)
           .neq('status', 'stearsa');
 
         if (error) {
           console.log('EROARE SUPABASE OCUPATE:', error);
-          return;
+        } else {
+          rezultat = rezultat.concat((data || []).map(function(p) {
+            return {
+              zi: {
+                dataIso: p.data
+              },
+              interval: p.ora_start + '-' + p.ora_final,
+              oraStart: p.ora_start,
+              text: p.nume_client || 'Ocupat',
+              tipSpecial: ''
+            };
+          }));
         }
 
-        (data || []).forEach(function(programare) {
-          if (!programare || !programare.data || !programare.ora_start || !programare.ora_final) return;
-
-          var ziIndex = zile.findIndex(function(zi) {
-            return zi.dataIso === programare.data;
-          });
-
-          if (ziIndex === -1) return;
-
-          var startIndex = sloturi.indexOf(programare.ora_start.slice(0, 5));
-          var finalIndex = sloturi.indexOf(programare.ora_final.slice(0, 5));
-
-          if (startIndex === -1) return;
-          if (finalIndex === -1) {
-            finalIndex = sloturi.length;
-          }
-
-          for (var i = startIndex; i < finalIndex; i++) {
-            ocupatePeZile[ziIndex].push(i);
-          }
-        });
-
-        /* BLOC SUPABASE - CITIRE INDISPONIBILITATI */
         const { data: indisponibilitati, error: errorIndisponibilitati } = await supabaseClient
           .from('indisponibilitati')
-          .select('tip, data_start, data_final, ora_start, ora_final, activa')
+          .select('tip, data_start, data_final, ora_start, ora_final, mesaj, activa, tip_special')
           .eq('activa', true)
           .gte('data_final', dateStart)
           .lte('data_start', dateFinal);
 
         if (errorIndisponibilitati) {
           console.log('EROARE SUPABASE INDISPONIBILITATI:', errorIndisponibilitati);
-          return;
-        }
-
-        (indisponibilitati || []).forEach(function(blocare) {
-          if (!blocare || !blocare.data_start || !blocare.data_final) return;
-
-          zile.forEach(function(zi, ziIndex) {
-            if (zi.dataIso < blocare.data_start || zi.dataIso > blocare.data_final) return;
+        } else {
+          (indisponibilitati || []).forEach(function(blocare) {
+            if (!blocare || !blocare.data_start || !blocare.data_final) return;
 
             if (blocare.tip === 'interval') {
               if (!blocare.ora_start || !blocare.ora_final) return;
 
-              var startIndex = sloturi.indexOf(blocare.ora_start.slice(0, 5));
-              var finalIndex = sloturi.indexOf(blocare.ora_final.slice(0, 5));
-
-              if (startIndex === -1) return;
-              if (finalIndex === -1) {
-                finalIndex = sloturi.length;
-              }
-
-              for (var i = startIndex; i < finalIndex; i++) {
-                ocupatePeZile[ziIndex].push(i);
-              }
+              rezultat.push({
+                zi: {
+                  dataIso: blocare.data_start
+                },
+                interval: blocare.ora_start + '-' + blocare.ora_final,
+                text: blocare.tip_special === 'personal' ? 'Personal' : (blocare.mesaj || 'Închis'),
+                tipSpecial: blocare.tip_special || ''
+              });
             }
 
-            if (blocare.tip === 'zi' || blocare.tip === 'concediu') {
-              for (var j = 0; j < sloturi.length; j++) {
-                ocupatePeZile[ziIndex].push(j);
+            if (blocare.tip === 'zi') {
+              rezultat.push({
+                zi: {
+                  dataIso: blocare.data_start
+                },
+                interval: '08:00-22:00',
+                text: blocare.tip_special === 'personal' ? 'Personal' : (blocare.mesaj || 'Închis'),
+                tipSpecial: blocare.tip_special || ''
+              });
+            }
+
+            if (blocare.tip === 'concediu') {
+              var start = new Date(blocare.data_start);
+              var final = new Date(blocare.data_final);
+
+              for (var d = new Date(start); d <= final; d.setDate(d.getDate() + 1)) {
+                var iso = new Date(d.getFullYear(), d.getMonth(), d.getDate()).toLocaleDateString('en-CA');
+
+                rezultat.push({
+                  zi: {
+                    dataIso: iso
+                  },
+                  interval: '08:00-22:00',
+                  text: blocare.tip_special === 'personal' ? 'Personal' : (blocare.mesaj || 'Concediu'),
+                  tipSpecial: blocare.tip_special || ''
+                });
               }
+            }
+          });
+        }
+
+        blocariUniversale = rezultat;
+
+        zile.forEach(function(zi, ziIndex) {
+          sloturi.forEach(function(slotText, slotIndex) {
+            var slot = getSlotPentruIndex(slotIndex);
+            var blocare = getBlocarePentruSlot(zi.dataIso, slot, blocariUniversale);
+
+            if (blocare) {
+              ocupatePeZile[ziIndex].push(slotIndex);
             }
           });
         });
       } catch(e) {
         console.log('EROARE SUPABASE OCUPATE:', e);
       }
+    }
+
+    function getSlotPentruIndex(index) {
+      var startMinute = 8 * 60 + (index * 60);
+      return {
+        startMinute: startMinute,
+        endMinute: startMinute + 60
+      };
+    }
+
+    function intervalToMinutes(interval) {
+      if (!interval || interval.indexOf('-') === -1) return null;
+
+      var parti = interval.split('-');
+      var start = parti[0].trim().split(':');
+      var end = parti[1].trim().split(':');
+
+      if (start.length < 2 || end.length < 2) return null;
+
+      return {
+        startMinute: Number(start[0]) * 60 + Number(start[1]),
+        endMinute: Number(end[0]) * 60 + Number(end[1])
+      };
+    }
+
+    function getBlocarePentruSlot(dataIso, slot, programari) {
+      return programari.find(function(p) {
+        if (!p || !p.zi || !p.zi.dataIso || !p.interval) return false;
+        if (p.zi.dataIso !== dataIso) return false;
+
+        var interval = intervalToMinutes(p.interval);
+        if (!interval) return false;
+
+        return slot.startMinute < interval.endMinute && slot.endMinute > interval.startMinute;
+      });
     }
 
     function getOcupatePentruZi() {
