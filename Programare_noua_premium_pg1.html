@@ -652,7 +652,6 @@
     document.querySelector(".selected-name").innerText = client.nume || "";
     document.querySelector(".selected-phone").innerText = client.telefon || "";
     clientSelectat = client;
-    localStorage.setItem("programare_client", JSON.stringify(client));
   }
 
 function goBack() {
@@ -665,10 +664,17 @@ function goBack() {
 
   function nextStep() {
     if (!clientSelectat) {
-      alert('Alege clientul înainte de NEXT.');
       return;
     }
-    window.location.href = 'Programare_noua_premium_pg2.html';
+
+    const params = new URLSearchParams({
+      client_id: clientSelectat.id || '',
+      client_nume: clientSelectat.nume || '',
+      client_telefon: clientSelectat.telefon || ''
+    });
+
+    window.location.href =
+      'Programare_noua_premium_pg2.html?' + params.toString();
   }
 
   loadClientsFromSupabase();
