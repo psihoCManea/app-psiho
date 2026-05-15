@@ -821,15 +821,22 @@ function updateConcediuDates() {
 /* PRECOMPLETARE DIN AGENDA PERSONALĂ */
 function preiaContextAgenda() {
   try {
-    const raw = localStorage.getItem('agenda_blocare_context');
 
-    if (!raw) return;
+    const params = new URLSearchParams(window.location.search);
 
-    agendaContext = JSON.parse(raw);
+    const data = params.get('data');
+    const oraStart = params.get('ora_start');
+    const titlu = params.get('titlu');
 
-    if (!agendaContext || !agendaContext.data) return;
+    if (!data) return;
 
-    selectedDate = agendaContext.data;
+    agendaContext = {
+      data: data,
+      ora_start: oraStart || '',
+      titlu: titlu || ''
+    };
+
+    selectedDate = data;
 
     document.querySelectorAll('.day-btn').forEach(function(btn) {
       btn.classList.remove('active');
@@ -838,6 +845,23 @@ function preiaContextAgenda() {
         btn.classList.add('active');
       }
     });
+
+    if (oraStart) {
+      selectedStart = String(oraStart).slice(0,5);
+
+      const [h] = selectedStart.split(':');
+      const oraFinala = String(Number(h) + 1).padStart(2, '0') + ':00';
+
+      selectedEnd = oraFinala;
+
+      document.querySelectorAll('.time-btn').forEach(function(btn) {
+        const t = btn.dataset.time;
+
+        if (t >= selectedStart && t <= selectedEnd) {
+          btn.classList.add('active');
+        }
+      });
+    }
 
     updateSummary();
 
