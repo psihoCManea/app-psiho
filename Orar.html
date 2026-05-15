@@ -651,12 +651,13 @@
 
     /* BLOC 11A - DESCHIDE PROGRAMARE DIN CELULĂ LIBERĂ */
     function deschideProgramareDinOrar(dataIso, oraStart) {
-      localStorage.setItem('programare_din_orar', JSON.stringify({
-        dataIso: dataIso,
-        oraStart: oraStart
-      }));
+      const params = new URLSearchParams({
+        data: dataIso,
+        ora: oraStart
+      });
 
-      window.location.href = 'Programare_noua_premium_pg3.html';
+      window.location.href =
+        'Programare_noua_premium_pg3.html?' + params.toString();
     }
 
     /* BLOC 12 - AFIȘARE TABEL */
