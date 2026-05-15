@@ -1372,7 +1372,7 @@
     var oraSelectataIndex = null;
     var confirmata = false;
     var programareDinOrar = null;
-    var programareNoua = null;
+    var programareConfirmataId = null;
 
     var zile = [];
     var toateZilele = [];
@@ -2030,6 +2030,8 @@
         interval: getIntervalText()
       };
 
+      programareConfirmataId = null;
+
       /* BLOC SUPABASE - SALVARE PROGRAMARE */
       try {
         const { data, error } = await supabaseClient
@@ -2053,6 +2055,7 @@
           console.log('EROARE SUPABASE PROGRAMARE:', error);
         } else if (data && data.id) {
           programareNoua.id = data.id;
+          programareConfirmataId = data.id;
         }
       } catch(e) {
         console.log('EROARE SUPABASE PROGRAMARE:', e);
@@ -2101,12 +2104,17 @@
         return;
       }
 
-      const idProgramare = programareNoua && programareNoua.id
-        ? programareNoua.id
-        : '';
+      if (!programareConfirmataId) {
+        document.getElementById('messageIcon').textContent = '!';
+        document.getElementById('messageIcon').style.borderColor = '#ff4040';
+        document.getElementById('messageIcon').style.color = '#ff4040';
+        document.getElementById('messageText').innerHTML =
+          '<span class="message-red">Programarea nu are ID salvat.</span>';
+        return;
+      }
 
       window.location.href =
-        'Programare_noua_premium_pg4.html?id=' + encodeURIComponent(idProgramare);
+        'Programare_noua_premium_pg4.html?id=' + encodeURIComponent(programareConfirmataId);
     }
 
     init();
