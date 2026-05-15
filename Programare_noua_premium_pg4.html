@@ -565,39 +565,87 @@ MODIFICARI:
     </div>
 
   </div>
-
   <script>
-    var durataSelectata = Number(localStorage.getItem('programare_durata') || 60);
-    var client = null;
+    var programareCurenta = null;
+    var programariMultipleCurente = [];
 
-    function init() {
+    function citesteParametruUrl(nume) {
+      const params = new URLSearchParams(window.location.search);
+      return params.get(nume);
+    }
 
-      /* ===== CITIRE PROGRAMARE MULTIPLA ===== */
-      try {
-        const multiple = JSON.parse(localStorage.getItem('programari_multiple_whatsapp') || 'null');
+    function formateazaTitluZi(dataIso) {
+      if (!dataIso) return '';
+      const d = new Date(dataIso + 'T00:00:00');
+      const zile = ['Duminică', 'Luni', 'Marți', 'Miercuri', 'Joi', 'Vineri', 'Sâmbătă'];
+      const zi = zile[d.getDay()];
+      const ziNr = String(d.getDate()).padStart(2, '0');
+      const luna = String(d.getMonth() + 1).padStart(2, '0');
+      return zi + ' ' + ziNr + '-' + luna;
+    }
 
-        if (multiple && multiple.client && multiple.programari && multiple.programari.length) {
-          client = multiple.client;
-        }
-      } catch(e) {}
+    function normalizeazaTelefonPentruWhatsapp(telefonInitial) {
+      var telefon = String(telefonInitial || '').replace(/[^0-9]/g, '');
 
-      /* ===== CITIRE PROGRAMARE SIMPLA ===== */
-      if (!client) {
-        try {
-          const rezultat = JSON.parse(localStorage.getItem('programare_rezultat') || 'null');
-
-          if (rezultat && rezultat.client && rezultat.interval) {
-            client = rezultat.client;
-          }
-        } catch(e) {}
+      if (telefon.startsWith('0')) {
+        telefon = '40' + telefon.substring(1);
       }
 
-      if (!client) {
-        window.location.href = 'Programare_noua_premium_pg1.html';
+      return telefon;
+    }
+
+    function construiesteInterval(p) {
+      return String(p.ora_start || '').slice(0,5) + ' - ' + String(p.ora_final || '').slice(0,5);
+    }
+
+    async function init() {
+      const idProgramare = citesteParametruUrl('id');
+      const idsProgramari = citesteParametruUrl('ids');
+
+      if (idsProgramari) {
+        const ids = idsProgramari
+          .split(',')
+          .map(function(x) { return x.trim(); })
+          .filter(Boolean);
+
+        const { data, error } = await supabaseClient
+          .from('programari')
+          .select('*')
+          .in('id', ids);
+
+        if (error || !data || !data.length) {
+          console.log('EROARE CITIRE PROGRAMARI MULTIPLE PG4:', error);
+          document.getElementById('clientName').textContent = 'Programările nu au fost găsite';
+          return;
+        }
+
+        programariMultipleCurente = (data || []).sort(function(a, b) {
+          return String(a.data + ' ' + a.ora_start).localeCompare(String(b.data + ' ' + b.ora_start));
+        });
+
+        document.getElementById('clientName').textContent = programariMultipleCurente[0].nume_client || '-';
         return;
       }
 
-      document.getElementById('clientName').textContent = client.nume || '-';
+      if (!idProgramare) {
+        document.getElementById('clientName').textContent = 'Lipsește ID programare';
+        return;
+      }
+
+      const { data, error } = await supabaseClient
+        .from('programari')
+        .select('*')
+        .eq('id', idProgramare)
+        .single();
+
+      if (error || !data) {
+        console.log('EROARE CITIRE PROGRAMARE PG4:', error);
+        document.getElementById('clientName').textContent = 'Programarea nu a fost găsită';
+        return;
+      }
+
+      programareCurenta = data;
+      document.getElementById('clientName').textContent = data.nume_client || '-';
     }
 
     function goBack() {
@@ -608,55 +656,22 @@ MODIFICARI:
       window.location.href = 'index_premium.html';
     }
 
-    init();
     async function trimiteWhatsApp() {
+      if (programariMultipleCurente && programariMultipleCurente.length) {
+        const telefon = normalizeazaTelefonPentruWhatsapp(programariMultipleCurente[0].telefon);
 
-    /* ===== WHATSAPP PROGRAMARE SIMPLA ===== */
-    var data = JSON.parse(localStorage.getItem('programare_rezultat') || 'null');
-
-    if (data && data.interval) {
-
-      var mesaj =
-`Buna,
-Iti confirm programarea:
-*${data.zi.titlu}, ${data.interval}*
-Daca intervine ceva, te rog sa ma anunti din timp.
-Multumesc!
-Cristian Manea`;
-
-      var telefon = (client.telefon || "").replace(/[^0-9]/g, "");
-
-      if (telefon.startsWith('0')) {
-        telefon = '40' + telefon.substring(1);
-      }
-
-      window.open("https://wa.me/" + telefon + "?text=" + encodeURIComponent(mesaj), "_blank");
-
-      if (data.id) {
-        const { error } = await supabaseClient
-          .from('programari')
-          .update({ confirmare_trimisa: true })
-          .eq('id', data.id);
-
-        if (error) {
-          console.log('EROARE CONFIRMARE SUPABASE:', error);
+        if (!telefon) {
+          console.log('PG4: telefon lipsă pentru programări multiple.');
+          return;
         }
-      }
 
-      return;
-    }
+        let lista = '';
 
-    /* ===== WHATSAPP PROGRAMARI MULTIPLE ===== */
-    const multiple = JSON.parse(localStorage.getItem('programari_multiple_whatsapp') || 'null');
+        programariMultipleCurente.forEach(function(p) {
+          lista += '*' + formateazaTitluZi(p.data) + ', ' + construiesteInterval(p) + '*\n';
+        });
 
-    if (multiple && multiple.programari && multiple.programari.length) {
-      let lista = '';
-
-      multiple.programari.forEach(function(p) {
-        lista += '*' + p.ziText + ', ' + p.interval + '*\n';
-      });
-
-      var mesaj =
+        const mesaj =
 `Buna,
 Iti confirm urmatoarele programari:
 
@@ -665,20 +680,49 @@ Daca intervine vreo modificare, te rog sa ma anunti din timp.
 Multumesc!
 Cristian Manea`;
 
-      var telefon = (multiple.client.telefon || "").replace(/[^0-9]/g, "");
+        const ids = programariMultipleCurente.map(function(p) { return p.id; });
 
-      if (telefon.startsWith('0')) {
-        telefon = '40' + telefon.substring(1);
+        await supabaseClient
+          .from('programari')
+          .update({ confirmare_trimisa: true })
+          .in('id', ids);
+
+        window.open("https://wa.me/" + telefon + "?text=" + encodeURIComponent(mesaj), "_blank");
+        return;
       }
 
+      if (!programareCurenta) {
+        console.log('PG4: programarea curentă lipsește.');
+        return;
+      }
+
+      const telefon = normalizeazaTelefonPentruWhatsapp(programareCurenta.telefon);
+
+      if (!telefon) {
+        console.log('PG4: telefon lipsă.');
+        return;
+      }
+
+      const titluZi = formateazaTitluZi(programareCurenta.data);
+      const interval = construiesteInterval(programareCurenta);
+
+      const mesaj =
+`Buna,
+Iti confirm programarea:
+*${titluZi}, ${interval}*
+Daca intervine ceva, te rog sa ma anunti din timp.
+Multumesc!
+Cristian Manea`;
+
+      await supabaseClient
+        .from('programari')
+        .update({ confirmare_trimisa: true })
+        .eq('id', programareCurenta.id);
+
       window.open("https://wa.me/" + telefon + "?text=" + encodeURIComponent(mesaj), "_blank");
-      return;
     }
 
-    return;
-
-
-}
+    init();
   </script>
 </body>
 </html>
