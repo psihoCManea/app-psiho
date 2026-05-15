@@ -1365,7 +1365,6 @@
 
   <script>
     var durataSelectata = 60;
-    localStorage.setItem('programare_durata', '60');
     var sloturiNecesare = 1;
     var client = null;
     var clienti = [];
@@ -1373,6 +1372,7 @@
     var oraSelectataIndex = null;
     var confirmata = false;
     var programareDinOrar = null;
+    var programareNoua = null;
 
     var zile = [];
     var toateZilele = [];
@@ -1393,8 +1393,29 @@
     var ocupatePeZile = [[], [], [], [], [], [], []];
 
     async function init() {
-      try { client = JSON.parse(localStorage.getItem('programare_client') || 'null'); } catch(e) {}
-      try { programareDinOrar = JSON.parse(localStorage.getItem('programare_din_orar') || 'null'); } catch(e) {}
+      const params = new URLSearchParams(window.location.search);
+
+      const clientIdUrl = params.get('client_id');
+      const clientNumeUrl = params.get('client_nume');
+      const clientTelefonUrl = params.get('client_telefon');
+
+      const dataUrl = params.get('data');
+      const oraUrl = params.get('ora');
+
+      if (clientIdUrl || clientNumeUrl || clientTelefonUrl) {
+        client = {
+          id: clientIdUrl || '',
+          nume: decodeURIComponent(clientNumeUrl || ''),
+          telefon: decodeURIComponent(clientTelefonUrl || '')
+        };
+      }
+
+      if (dataUrl && oraUrl) {
+        programareDinOrar = {
+          dataIso: dataUrl,
+          oraStart: oraUrl
+        };
+      }
 
       await loadClientsFromSupabase();
 
@@ -1475,7 +1496,6 @@
     /* BLOC CLIENT - SELECTARE CLIENT */
     function selectClient(c) {
       client = c;
-      localStorage.setItem('programare_client', JSON.stringify(c));
       afiseazaClientSelectat(c);
 
       const box = document.getElementById('clientResults');
@@ -1583,7 +1603,6 @@
         oraSelectataIndex = indexOra;
       }
 
-      localStorage.removeItem('programare_din_orar');
       programareDinOrar = null;
     }
 
@@ -2011,11 +2030,6 @@
         interval: getIntervalText()
       };
 
-      localStorage.setItem('programare_rezultat', JSON.stringify(programareNoua));
-
-      /* ===== RESET CLIENT SELECTAT DUPA CONFIRMARE ===== */
-      localStorage.removeItem('programare_client');
-
       /* BLOC SUPABASE - SALVARE PROGRAMARE */
       try {
         const { data, error } = await supabaseClient
@@ -2039,7 +2053,6 @@
           console.log('EROARE SUPABASE PROGRAMARE:', error);
         } else if (data && data.id) {
           programareNoua.id = data.id;
-          localStorage.setItem('programare_rezultat', JSON.stringify(programareNoua));
         }
       } catch(e) {
         console.log('EROARE SUPABASE PROGRAMARE:', e);
@@ -2088,7 +2101,12 @@
         return;
       }
 
-      window.location.href = 'Programare_noua_premium_pg4.html';
+      const idProgramare = programareNoua && programareNoua.id
+        ? programareNoua.id
+        : '';
+
+      window.location.href =
+        'Programare_noua_premium_pg4.html?id=' + encodeURIComponent(idProgramare);
     }
 
     init();
