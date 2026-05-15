@@ -913,14 +913,24 @@ const client = window.supabase.createClient(
         const taskValid = taskuriValide[0];
 
         const zile = ['Duminică', 'Luni', 'Marți', 'Miercuri', 'Joi', 'Vineri', 'Sâmbătă'];
+        const luni = ['ianuarie', 'februarie', 'martie', 'aprilie', 'mai', 'iunie', 'iulie', 'august', 'septembrie', 'octombrie', 'noiembrie', 'decembrie'];
+
         const dataTask = new Date(taskValid.data + 'T00:00:00');
+
         const zi = zile[dataTask.getDay()];
+        const ziLuna = dataTask.getDate();
+        const luna = luni[dataTask.getMonth()];
+
         const ora = String(taskValid.ora_start || '').slice(0,5);
 
         el.innerText =
           (taskValid.titlu || 'Task') +
           ' — ' +
           zi +
+          ' ' +
+          ziLuna +
+          ' ' +
+          luna +
           ' ' +
           ora;
       } catch(e) {
