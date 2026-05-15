@@ -1234,24 +1234,6 @@
 
         const nr = selectiiTemporare.length;
 
-        /* ===== SALVARE PROGRAMARI MULTIPLE PENTRU PG4 ===== */
-        const programariMultipleWhatsapp = selectiiTemporare.map(function(s) {
-          return {
-            ziText: s.ziText,
-            interval: s.oraStart + ' - ' + s.oraFinal
-          };
-        });
-
-        localStorage.setItem('programari_multiple_whatsapp', JSON.stringify({
-          client: clientSelectat,
-          programari: programariMultipleWhatsapp
-        }));
-
-        /* ===== COMPATIBILITATE PG4 WHATSAPP ===== */
-        localStorage.setItem('programare_rezultat', JSON.stringify({
-          client: clientSelectat
-        }));
-
         selectiiTemporare = [];
         inchideConfirmare();
 
@@ -1259,8 +1241,24 @@
 
         await renderOrar();
 
-        /* ===== DESCHIDERE PAGINA 4 ===== */
-        window.location.href = 'Programare_noua_premium_pg4.html';
+        const primaProgramare = programariDeSalvat[0];
+
+        const { data: programarePg4 } = await supabaseClient
+          .from('programari')
+          .select('id')
+          .eq('nume_client', primaProgramare.nume_client)
+          .eq('telefon', primaProgramare.telefon)
+          .eq('data', primaProgramare.data)
+          .eq('ora_start', primaProgramare.ora_start)
+          .order('id', { ascending: false })
+          .limit(1)
+          .single();
+
+        if (programarePg4 && programarePg4.id) {
+          window.location.href =
+            'Programare_noua_premium_pg4.html?id=' +
+            encodeURIComponent(programarePg4.id);
+        }
 
       } catch(e) {
         console.log('EROARE SALVARE PROGRAMARI MULTIPLE:', e);
