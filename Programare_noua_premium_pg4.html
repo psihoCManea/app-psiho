@@ -624,7 +624,13 @@ Daca intervine ceva, te rog sa ma anunti din timp.
 Multumesc!
 Cristian Manea`;
 
-      var telefon = (client.telefon || "").replace(/\D/g, "");
+      var telefon = (client.telefon || "").trim();
+
+      if (telefon.startsWith("+")) {
+        telefon = telefon.substring(1);
+      }
+
+      telefon = telefon.replace(/\D/g, "");
       var isMobile = /Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent);
 
       var url = isMobile
