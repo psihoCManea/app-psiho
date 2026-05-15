@@ -1221,9 +1221,10 @@
       });
 
       try {
-        const { error } = await supabaseClient
+        const { data: programariSalvate, error } = await supabaseClient
           .from('programari')
-          .insert(programariDeSalvat);
+          .insert(programariDeSalvat)
+          .select('id, nume_client, telefon, data, ora_start, ora_final');
 
         if (error) {
           console.log('EROARE SALVARE PROGRAMARI MULTIPLE:', error);
@@ -1234,6 +1235,10 @@
 
         const nr = selectiiTemporare.length;
 
+        const idsSalvate = (programariSalvate || [])
+          .map(function(p) { return p.id; })
+          .filter(function(id) { return id !== null && id !== undefined; });
+
         selectiiTemporare = [];
         inchideConfirmare();
 
@@ -1241,23 +1246,10 @@
 
         await renderOrar();
 
-        const primaProgramare = programariDeSalvat[0];
-
-        const { data: programarePg4 } = await supabaseClient
-          .from('programari')
-          .select('id')
-          .eq('nume_client', primaProgramare.nume_client)
-          .eq('telefon', primaProgramare.telefon)
-          .eq('data', primaProgramare.data)
-          .eq('ora_start', primaProgramare.ora_start)
-          .order('id', { ascending: false })
-          .limit(1)
-          .single();
-
-        if (programarePg4 && programarePg4.id) {
+        if (idsSalvate.length) {
           window.location.href =
-            'Programare_noua_premium_pg4.html?id=' +
-            encodeURIComponent(programarePg4.id);
+            'Programare_noua_premium_pg4.html?ids=' +
+            encodeURIComponent(idsSalvate.join(','));
         }
 
       } catch(e) {
