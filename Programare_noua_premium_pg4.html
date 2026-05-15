@@ -624,20 +624,13 @@ Daca intervine ceva, te rog sa ma anunti din timp.
 Multumesc!
 Cristian Manea`;
 
-      var telefon = (client.telefon || "").trim();
+      var telefon = (client.telefon || "").replace(/[^0-9]/g, "");
 
-      if (telefon.startsWith("+")) {
-        telefon = telefon.substring(1);
+      if (telefon.startsWith('0')) {
+        telefon = '40' + telefon.substring(1);
       }
 
-      telefon = telefon.replace(/\D/g, "");
-      var isMobile = /Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent);
-
-      var url = isMobile
-        ? "https://wa.me/" + telefon + "?text=" + encodeURIComponent(mesaj)
-        : "whatsapp://send?phone=" + telefon + "&text=" + encodeURIComponent(mesaj);
-
-      window.location.href = url;
+      window.open("https://wa.me/" + telefon + "?text=" + encodeURIComponent(mesaj), "_blank");
 
       if (data.id) {
         const { error } = await supabaseClient
@@ -672,14 +665,13 @@ Daca intervine vreo modificare, te rog sa ma anunti din timp.
 Multumesc!
 Cristian Manea`;
 
-      var telefon = (multiple.client.telefon || "").replace(/\D/g, "");
-      var isMobile = /Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent);
+      var telefon = (multiple.client.telefon || "").replace(/[^0-9]/g, "");
 
-      var url = isMobile
-        ? "https://wa.me/" + telefon + "?text=" + encodeURIComponent(mesaj)
-        : "whatsapp://send?phone=" + telefon + "&text=" + encodeURIComponent(mesaj);
+      if (telefon.startsWith('0')) {
+        telefon = '40' + telefon.substring(1);
+      }
 
-      window.location.href = url;
+      window.open("https://wa.me/" + telefon + "?text=" + encodeURIComponent(mesaj), "_blank");
       return;
     }
 
