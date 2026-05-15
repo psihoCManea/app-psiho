@@ -477,16 +477,18 @@
         }
 
         if (blocheaza) {
-          localStorage.setItem('agenda_blocare_context', JSON.stringify({
-            titlu: titlu,
-            data: data,
-            ora_start: ora
-          }));
 
           afiseazaMesaj('Task salvat. Se deschide Indisponibilități.', 'ok');
 
           setTimeout(function() {
-            window.location.href = 'Indisponibilitati_premium.html';
+            const params = new URLSearchParams({
+              titlu: titlu,
+              data: data,
+              ora_start: ora
+            });
+
+            window.location.href =
+              'Indisponibilitati_premium.html?' + params.toString();
           }, 600);
 
           return;
