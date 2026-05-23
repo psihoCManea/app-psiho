@@ -170,6 +170,17 @@
       z-index: 4;
     }
 
+    .head-cell.weekend-head {
+      background: #000000;
+      color: #f2c94c;
+      border-bottom: 2px solid #f2c94c;
+    }
+
+    .head-cell.weekend-head .day-name,
+    .head-cell.weekend-head .day-date {
+      color: #f2c94c;
+    }
+
     .day-name {
       font-size: 11px;
       font-weight: 900;
@@ -676,8 +687,11 @@
       html += '<div class="cell head-cell hour-cell col-sep">Ora</div>';
 
       zile.forEach(function(zi) {
+        const esteWeekend = zi.ziScurt === 'Sa' || zi.ziScurt === 'Du';
+        const clasaWeekend = esteWeekend ? ' weekend-head' : '';
+
         html += `
-          <div class="cell head-cell">
+          <div class="cell head-cell${clasaWeekend}">
             <div class="day-name">${zi.ziScurt}</div>
             <div class="day-date">${zi.dataText}</div>
           </div>
