@@ -208,6 +208,12 @@
       color: #f2c94c;
     }
 
+    .closed-slot {
+      background: rgba(0, 0, 0, 0.82);
+      color: #f2c94c;
+      cursor: pointer;
+    }
+
     /* BLOC PERSONAL - AGENDA PERSONALĂ ÎN ORAR */
     .busy-personal {
       background: rgba(255, 0, 0, 0.50);
@@ -357,6 +363,72 @@
       }
     }
 
+    .popup-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.78);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      padding: 20px;
+    }
+
+    .popup-overlay.show {
+      display: flex;
+    }
+
+    .popup-box {
+      width: 100%;
+      max-width: 330px;
+      border-radius: 20px;
+      border: 2px solid #f2c94c;
+      background: linear-gradient(180deg, #121212 0%, #050505 100%);
+      box-shadow: 0 0 35px rgba(242,201,76,0.25);
+      padding: 22px 18px;
+      text-align: center;
+    }
+
+    .popup-title {
+      color: #f2c94c;
+      font-size: 22px;
+      font-weight: 900;
+      margin-bottom: 10px;
+    }
+
+    .popup-text {
+      color: #ffffff;
+      font-size: 17px;
+      font-weight: 900;
+      line-height: 1.25;
+      margin-bottom: 18px;
+    }
+
+    .popup-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .popup-btn {
+      flex: 1;
+      height: 48px;
+      border: none;
+      border-radius: 14px;
+      font-size: 15px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .popup-btn.confirm {
+      background: linear-gradient(145deg, #f6d257, #a96f10);
+      color: #111;
+    }
+
+    .popup-btn.cancel {
+      background: linear-gradient(145deg, #1a1a1a, #070707);
+      color: #f2c94c;
+      border: 1px solid #f2c94c;
+    }
 
   </style>
 
@@ -392,6 +464,16 @@
       <div id="orarGrid" class="orar-grid"></div>
     </div>
 
+    <div class="popup-overlay" id="deblocarePopup">
+      <div class="popup-box">
+        <div class="popup-title">Slot închis</div>
+        <div class="popup-text">Vrei să deblochezi acest interval?</div>
+        <div class="popup-actions">
+          <button class="popup-btn confirm" onclick="confirmaDeblocare()">Confirm</button>
+          <button class="popup-btn cancel" onclick="renuntaDeblocare()">Renunț</button>
+        </div>
+      </div>
+    </div>
 
   </div>
 
@@ -403,6 +485,14 @@
     const NUMAR_ZILE_AFISATE = 90;
 
     let lunaSelectataOffset = 0;
+    let setariOrar = {
+      sambata_deschis: true,
+      duminica_deschis: false,
+      ora_start: '08:00',
+      ora_final: '22:00'
+    };
+    let deblocariOrar = [];
+    let slotPentruDeblocare = null;
 
     const ZILE_SCURT = ['Du', 'Lu', 'Ma', 'Mi', 'Jo', 'Vi', 'Sa'];
     const LUNI = ['ian', 'feb', 'mar', 'apr', 'mai', 'iun', 'iul', 'aug', 'sep', 'oct', 'nov', 'dec'];
@@ -522,6 +612,109 @@
       return slots;
     }
 
+    async function incarcaSetariOrar() {
+      const { data, error } = await supabaseClient
+        .from('setari_orar')
+        .select('*')
+        .eq('id', 1)
+        .single();
+
+      if (!error && data) {
+        setariOrar = {
+          sambata_deschis: data.sambata_deschis === true,
+          duminica_deschis: data.duminica_deschis === true,
+          ora_start: data.ora_start || '08:00',
+          ora_final: data.ora_final || '22:00'
+        };
+      }
+    }
+
+    async function incarcaDeblocariOrar() {
+      const { data, error } = await supabaseClient
+        .from('deblocari_orar')
+        .select('data, ora_start, ora_final, activa')
+        .eq('activa', true);
+
+      if (!error) {
+        deblocariOrar = data || [];
+      } else {
+        deblocariOrar = [];
+      }
+    }
+
+    function esteDeblocatManual(dataIso, slot) {
+      return deblocariOrar.some(function(d) {
+        if (!d || d.activa !== true) return false;
+        if (String(d.data) !== String(dataIso)) return false;
+
+        const start = String(d.ora_start || '').slice(0,5);
+        const final = String(d.ora_final || '').slice(0,5);
+
+        return start === minuteToText(slot.startMinute) && final === minuteToText(slot.endMinute);
+      });
+    }
+
+    function esteSlotInchisDinSetari(zi, slot) {
+      if (!zi || !zi.dataIso) return false;
+
+      const dataObj = new Date(zi.dataIso + 'T00:00:00');
+      const ziSaptamana = dataObj.getDay();
+
+      if (ziSaptamana === 6 && setariOrar.sambata_deschis !== true) return true;
+      if (ziSaptamana === 0 && setariOrar.duminica_deschis !== true) return true;
+
+      const startProgram = timeToMinutes(setariOrar.ora_start || '08:00');
+      const finalProgram = timeToMinutes(setariOrar.ora_final || '22:00');
+
+      return slot.startMinute < startProgram || slot.endMinute > finalProgram;
+    }
+
+    function cereDeblocareSlot(dataIso, oraStart, oraFinal) {
+      slotPentruDeblocare = {
+        dataIso: dataIso,
+        oraStart: oraStart,
+        oraFinal: oraFinal
+      };
+
+      const popup = document.getElementById('deblocarePopup');
+      if (popup) popup.classList.add('show');
+    }
+
+    function renuntaDeblocare() {
+      slotPentruDeblocare = null;
+
+      const popup = document.getElementById('deblocarePopup');
+      if (popup) popup.classList.remove('show');
+    }
+
+    async function confirmaDeblocare() {
+      if (!slotPentruDeblocare) return;
+
+      const slot = slotPentruDeblocare;
+      renuntaDeblocare();
+
+      const { error } = await supabaseClient
+        .from('deblocari_orar')
+        .insert([{
+          data: slot.dataIso,
+          ora_start: slot.oraStart,
+          ora_final: slot.oraFinal,
+          activa: true
+        }]);
+
+      if (error) {
+        console.log('EROARE DEBLOCARE SLOT:', error);
+        return;
+      }
+
+      window.location.href =
+        'Programare_noua_premium_pg3.html?' +
+        new URLSearchParams({
+          data: slot.dataIso,
+          ora: slot.oraStart
+        }).toString();
+    }
+
     /* BLOC 10 - CITIRE PROGRAMĂRI ȘI INDISPONIBILITĂȚI DIN SUPABASE */
     async function getProgramari() {
       try {
@@ -606,6 +799,12 @@
       }
     }
 
+    function timeToMinutes(t) {
+      if (!t || t.indexOf(':') === -1) return 0;
+      const parti = t.split(':');
+      return Number(parti[0]) * 60 + Number(parti[1]);
+    }
+
     function intervalToMinutes(interval) {
       if (!interval || interval.indexOf('-') === -1) return null;
 
@@ -676,6 +875,9 @@
       const grid = document.getElementById('orarGrid');
       const zile = getDays();
       const slots = getSlots();
+      await incarcaSetariOrar();
+      await incarcaDeblocariOrar();
+
       const programari = await getProgramari();
 
       seteazaButoaneLuni();
@@ -704,14 +906,20 @@
         zile.forEach(function(zi) {
           const blocare = getBlocarePentruSlot(zi.dataIso, slot, programari);
           const ocupat = !!blocare;
+          const deblocatManual = esteDeblocatManual(zi.dataIso, slot);
+          const inchisDinSetari = !ocupat && !deblocatManual && esteSlotInchisDinSetari(zi, slot);
           const programareInceputa = ocupat && esteProgramareInceputa(zi.dataIso, blocare);
           const estePersonal = ocupat && blocare.tipSpecial === 'personal';
-          const clasaCelula = ocupat ? (estePersonal ? 'busy-personal' : (programareInceputa ? 'busy-past' : 'busy')) : 'free';
-          const textCelula = ocupat ? (estePersonal ? 'Personal' : (blocare.text || 'Ocupat')) : 'Liber';
+
           if (ocupat) {
+            const clasaCelula = estePersonal ? 'busy-personal' : (programareInceputa ? 'busy-past' : 'busy');
+            const textCelula = estePersonal ? 'Personal' : (blocare.text || 'Ocupat');
+
             html += `<div class="cell ${clasaCelula}"><div class="slot-text">${escapeHtml(textCelula)}</div></div>`;
+          } else if (inchisDinSetari) {
+            html += `<div class="cell closed-slot" onclick="cereDeblocareSlot('${zi.dataIso}', '${minuteToText(slot.startMinute)}', '${minuteToText(slot.endMinute)}')"><div class="slot-text">Închis</div></div>`;
           } else {
-            html += `<div class="cell ${clasaCelula}" onclick="deschideProgramareDinOrar('${zi.dataIso}', '${minuteToText(slot.startMinute)}')"><div class="slot-text">${escapeHtml(textCelula)}</div></div>`;
+            html += `<div class="cell free" onclick="deschideProgramareDinOrar('${zi.dataIso}', '${minuteToText(slot.startMinute)}')"><div class="slot-text">Liber</div></div>`;
           }
         });
       });
