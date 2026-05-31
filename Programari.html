@@ -766,6 +766,8 @@ const supabaseClient = window.supabase.createClient(
           interval: (p.ora_start || '') + ' - ' + (p.ora_final || ''),
           confirmare_trimisa: p.confirmare_trimisa === true,
           reminder_trimis: p.reminder_trimis === true,
+          ora_start: p.ora_start || '',
+          ora_final: p.ora_final || '',
           zi: {
             dataIso: p.data || '',
             titlu: p.data || ''
@@ -1018,6 +1020,32 @@ ${p.tipIndisponibilitate === 'concediu'
       incarcaAgendaProgramari();
     }
 
+    async function dezactiveazaDeblocarePentruProgramare(idProgramare) {
+      const programare = programariOriginale.find(function(p) {
+        return String(p.id) === String(idProgramare);
+      });
+
+      if (!programare || !programare.zi || !programare.zi.dataIso) return;
+
+      const dataIso = programare.zi.dataIso;
+      const oraStart = String(programare.ora_start || getOraStart(programare.interval) || '').slice(0,5);
+      const oraFinal = String(programare.ora_final || '').slice(0,5);
+
+      if (!dataIso || !oraStart || !oraFinal) return;
+
+      const { error } = await supabaseClient
+        .from('deblocari_orar')
+        .update({ activa: false })
+        .eq('data', dataIso)
+        .eq('ora_start', oraStart)
+        .eq('ora_final', oraFinal)
+        .eq('activa', true);
+
+      if (error) {
+        console.log('EROARE DEZACTIVARE DEBLOCARE ORAR:', error);
+      }
+    }
+
     /* BLOC 6 - ȘTERGERE LOGICĂ ÎN SUPABASE */
     async function confirmaStergere(id, tipCard) {
       const idFinal = /^[0-9]+$/.test(String(id)) ? Number(id) : String(id);
@@ -1054,6 +1082,8 @@ ${p.tipIndisponibilitate === 'concediu'
         afiseazaPopupPremium('Eroare ștergere programare', 'error');
         return;
       }
+
+      await dezactiveazaDeblocarePentruProgramare(idFinal);
 
       stergereId = null;
       await incarcaProgramari();
