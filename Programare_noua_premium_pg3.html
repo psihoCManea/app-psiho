@@ -365,6 +365,19 @@
       cursor: not-allowed;
     }
 
+    .slot.closed {
+      color: #ffd6e7;
+      border-color: rgba(255, 112, 178, 0.85);
+      background: linear-gradient(145deg, #5a1233, #250616);
+      cursor: pointer;
+    }
+
+    .day-card.closed-day {
+      border-color: rgba(255, 112, 178, 0.85);
+      background: linear-gradient(145deg, #5a1233, #250616);
+      color: #ffd6e7;
+    }
+
     .slot.selected-range {
       border: 4px solid #ff2020;
       color: rgba(255,255,255,1);
@@ -1267,6 +1280,33 @@
       cursor: pointer;
     }
 
+    .popup-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .popup-action-btn {
+      flex: 1;
+      height: 50px;
+      border-radius: 15px;
+      font-size: 16px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .popup-action-btn.confirm {
+      border: none;
+      background: linear-gradient(145deg, #f6d257, #a96f10);
+      color: #111;
+    }
+
+    .popup-action-btn.cancel {
+      background: linear-gradient(145deg, #1a1a1a, #070707);
+      color: #f2c94c;
+      border: 1px solid #f2c94c;
+    }
+
     @media (max-width: 520px), (min-width: 701px) {
       .popup-box {
         max-width: 300px;
@@ -1391,6 +1431,15 @@
     ];
 
     var ocupatePeZile = [[], [], [], [], [], [], []];
+    var inchisePeZile = [];
+    var setariOrar = {
+      sambata_deschis: true,
+      duminica_deschis: false,
+      ora_start: '08:00',
+      ora_final: '22:00'
+    };
+    var deblocariOrar = [];
+    var slotPentruDeblocare = null;
 
     async function init() {
       const params = new URLSearchParams(window.location.search);
@@ -1426,6 +1475,7 @@
       buildDynamicDays();
       aplicaSelectieDinOrar();
       renderMonthButtons();
+      await incarcaSetariSiDeblocari();
       await incarcaOcupateDinSupabase();
       renderDays();
       renderSlots();
@@ -1626,6 +1676,7 @@
     async function selectMonth(index) {
       lunaSelectataIndex = index;
       seteazaZilePentruLuna();
+      await incarcaSetariSiDeblocari();
       await incarcaOcupateDinSupabase();
       renderMonthButtons();
       renderDays();
@@ -1642,7 +1693,8 @@
 
       zile.forEach(function(zi, index) {
         var div = document.createElement('div');
-        div.className = 'day-card' + (index === ziSelectataIndex ? ' selected' : '');
+        var ziInchisa = esteZiInchisaDinSetari(zi);
+        div.className = 'day-card' + (index === ziSelectataIndex ? ' selected' : '') + (ziInchisa ? ' closed-day' : '');
         div.onclick = function() { selectDay(index); };
 
         div.innerHTML =
@@ -1659,6 +1711,7 @@
       grid.innerHTML = '';
 
       var ocupate = getOcupatePentruZi();
+      var inchise = getInchisePentruZi();
 
       sloturi.forEach(function(slot, index) {
         var div = document.createElement('div');
@@ -1666,6 +1719,10 @@
 
         if (ocupate.indexOf(index) !== -1) {
           div.classList.add('occupied');
+        }
+
+        if (ocupate.indexOf(index) === -1 && inchise.indexOf(index) !== -1) {
+          div.classList.add('closed');
         }
 
         if (confirmata && esteInInterval(index)) {
@@ -1678,7 +1735,7 @@
           }
         }
 
-        div.textContent = slot;
+        div.textContent = inchise.indexOf(index) !== -1 && ocupate.indexOf(index) === -1 ? 'Închis' : slot;
         div.onclick = function() { selectSlot(index); };
 
         grid.appendChild(div);
@@ -1700,6 +1757,11 @@
 
     function selectSlot(index) {
       if (confirmata) return;
+
+      if (esteSlotInchisIndex(index) && getOcupatePentruZi().indexOf(index) === -1) {
+        cereDeblocareSlot(index);
+        return;
+      }
 
       oraSelectataIndex = index;
       renderSlots();
@@ -1724,6 +1786,7 @@
       if (oraSelectataIndex === null) return false;
 
       var ocupate = getOcupatePentruZi();
+      var inchise = getInchisePentruZi();
 
       if (oraSelectataIndex + sloturiNecesare > sloturi.length) {
         return false;
@@ -1733,9 +1796,161 @@
         if (ocupate.indexOf(oraSelectataIndex + i) !== -1) {
           return false;
         }
+
+        if (inchise.indexOf(oraSelectataIndex + i) !== -1) {
+          return false;
+        }
       }
 
       return true;
+    }
+
+    function timeToMinutes(t) {
+      if (!t || String(t).indexOf(':') === -1) return 0;
+      var parti = String(t).split(':');
+      return Number(parti[0]) * 60 + Number(parti[1]);
+    }
+
+    async function incarcaSetariSiDeblocari() {
+      const { data: setari, error: errorSetari } = await supabaseClient
+        .from('setari_orar')
+        .select('*')
+        .eq('id', 1)
+        .single();
+
+      if (!errorSetari && setari) {
+        setariOrar = {
+          sambata_deschis: setari.sambata_deschis === true,
+          duminica_deschis: setari.duminica_deschis === true,
+          ora_start: setari.ora_start || '08:00',
+          ora_final: setari.ora_final || '22:00'
+        };
+      }
+
+      var dateStart = zile && zile.length ? zile[0].dataIso : null;
+      var dateFinal = zile && zile.length ? zile[zile.length - 1].dataIso : null;
+
+      if (!dateStart || !dateFinal) {
+        deblocariOrar = [];
+        return;
+      }
+
+      const { data: deblocari, error: errorDeblocari } = await supabaseClient
+        .from('deblocari_orar')
+        .select('data, ora_start, ora_final, activa')
+        .eq('activa', true)
+        .gte('data', dateStart)
+        .lte('data', dateFinal);
+
+      if (!errorDeblocari) {
+        deblocariOrar = deblocari || [];
+      } else {
+        deblocariOrar = [];
+      }
+    }
+
+    function esteZiInchisaDinSetari(zi) {
+      if (!zi || !zi.dataIso) return false;
+
+      var dataObj = new Date(zi.dataIso + 'T00:00:00');
+      var ziSaptamana = dataObj.getDay();
+
+      if (ziSaptamana === 6 && setariOrar.sambata_deschis !== true) return true;
+      if (ziSaptamana === 0 && setariOrar.duminica_deschis !== true) return true;
+
+      return false;
+    }
+
+    function esteDeblocatManual(dataIso, oraStart, oraFinal) {
+      return deblocariOrar.some(function(d) {
+        if (!d || d.activa !== true) return false;
+        if (String(d.data) !== String(dataIso)) return false;
+
+        return String(d.ora_start || '').slice(0,5) === oraStart &&
+               String(d.ora_final || '').slice(0,5) === oraFinal;
+      });
+    }
+
+    function esteSlotInchisIndex(index) {
+      var zi = zile[ziSelectataIndex];
+      if (!zi) return false;
+
+      var oraStart = sloturi[index];
+      var oraFinal = getEndTime(index);
+
+      if (esteDeblocatManual(zi.dataIso, oraStart, oraFinal)) return false;
+
+      if (esteZiInchisaDinSetari(zi)) return true;
+
+      var startProgram = timeToMinutes(setariOrar.ora_start || '08:00');
+      var finalProgram = timeToMinutes(setariOrar.ora_final || '22:00');
+      var slot = getSlotPentruIndex(index);
+
+      return slot.startMinute < startProgram || slot.endMinute > finalProgram;
+    }
+
+    function getInchisePentruZi() {
+      var inchise = [];
+
+      sloturi.forEach(function(slot, index) {
+        if (esteSlotInchisIndex(index)) {
+          inchise.push(index);
+        }
+      });
+
+      return inchise;
+    }
+
+    function cereDeblocareSlot(index) {
+      var zi = zile[ziSelectataIndex];
+      if (!zi) return;
+
+      slotPentruDeblocare = {
+        index: index,
+        dataIso: zi.dataIso,
+        oraStart: sloturi[index],
+        oraFinal: getEndTime(index)
+      };
+
+      var popup = document.getElementById('deblocarePopup');
+      if (popup) popup.classList.add('show');
+    }
+
+    function renuntaDeblocare() {
+      slotPentruDeblocare = null;
+
+      var popup = document.getElementById('deblocarePopup');
+      if (popup) popup.classList.remove('show');
+    }
+
+    async function confirmaDeblocare() {
+      if (!slotPentruDeblocare) return;
+
+      var slot = slotPentruDeblocare;
+      renuntaDeblocare();
+
+      const { error } = await supabaseClient
+        .from('deblocari_orar')
+        .insert([{
+          data: slot.dataIso,
+          ora_start: slot.oraStart,
+          ora_final: slot.oraFinal,
+          activa: true
+        }]);
+
+      if (error) {
+        console.log('EROARE DEBLOCARE SLOT PG3:', error);
+        return;
+      }
+
+      await incarcaSetariSiDeblocari();
+      oraSelectataIndex = slot.index;
+      renderSlots();
+
+      if (intervalEsteLiber()) {
+        updateMessageFree();
+        setConfirmEnabled(true);
+      }
     }
 
     /* BLOC SUPABASE - CITIRE SLOTURI OCUPATE
@@ -2133,6 +2348,22 @@
       <button class="popup-ok-btn" onclick="closeErrorPopup()">
         OK
       </button>
+    </div>
+  </div>
+
+  <div class="popup-overlay" id="deblocarePopup">
+    <div class="popup-box">
+      <div class="popup-icon">!</div>
+
+      <div class="popup-text">
+        <span class="popup-text-red">Slot închis</span><br>
+        Vrei să deblochezi acest interval?
+      </div>
+
+      <div class="popup-actions">
+        <button class="popup-action-btn confirm" onclick="confirmaDeblocare()">Confirm</button>
+        <button class="popup-action-btn cancel" onclick="renuntaDeblocare()">Renunț</button>
+      </div>
     </div>
   </div>
 
