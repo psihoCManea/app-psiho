@@ -209,8 +209,9 @@
     }
 
     .closed-slot {
-      background: rgba(0, 0, 0, 0.82);
-      color: #f2c94c;
+      background: linear-gradient(145deg, #5a1233, #250616);
+      color: #ffd6e7;
+      border-color: rgba(255, 112, 178, 0.85);
       cursor: pointer;
     }
 
@@ -692,20 +693,6 @@
 
       const slot = slotPentruDeblocare;
       renuntaDeblocare();
-
-      const { error } = await supabaseClient
-        .from('deblocari_orar')
-        .insert([{
-          data: slot.dataIso,
-          ora_start: slot.oraStart,
-          ora_final: slot.oraFinal,
-          activa: true
-        }]);
-
-      if (error) {
-        console.log('EROARE DEBLOCARE SLOT:', error);
-        return;
-      }
 
       window.location.href =
         'Programare_noua_premium_pg3.html?' +
