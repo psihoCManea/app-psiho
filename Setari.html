@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Setări</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      min-height: 100%;
+      font-family: Arial, sans-serif;
+      background:
+        radial-gradient(circle at top center, rgba(170,120,20,0.75) 0%, rgba(40,28,8,0.95) 30%, #030303 72%),
+        linear-gradient(180deg, #080808 0%, #000 100%);
+      color: #fff;
+      overflow-x: hidden;
+    }
+
+    body {
+      min-height: 100vh;
+    }
+
+    .page {
+      min-height: 100vh;
+      padding: 12px 10px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .header {
+      position: relative;
+      text-align: center;
+      margin-bottom: 4px;
+      padding-top: 2px;
+    }
+
+    .back-btn {
+      position: absolute;
+      left: 0;
+      top: 2px;
+      color: #f2c94c;
+      font-size: 13px;
+      font-weight: 900;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .back-arrow {
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    .title {
+      font-size: 28px;
+      font-weight: 900;
+      color: #f2c94c;
+    }
+
+    .subtitle {
+      margin-top: 6px;
+      font-size: 18px;
+      color: white;
+      font-weight: 800;
+    }
+
+    .settings-card {
+      border: 1px solid #f2c94c;
+      border-radius: 14px;
+      padding: 12px;
+      background: rgba(12, 24, 38, 0.88);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .setting-row {
+      border: 1px solid rgba(242,201,76,0.45);
+      border-radius: 13px;
+      background: rgba(255,255,255,0.04);
+      padding: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .setting-text {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .setting-title {
+      color: #f2c94c;
+      font-size: 15px;
+      font-weight: 900;
+    }
+
+    .setting-sub {
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 700;
+      opacity: 0.85;
+    }
+
+    .toggle {
+      width: 92px;
+      height: 38px;
+      border-radius: 19px;
+      border: 1px solid #f2c94c;
+      background: #250909;
+      color: #ff4040;
+      font-size: 12px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .toggle.open {
+      background: linear-gradient(145deg, #f6d257, #a96f10);
+      color: #111;
+    }
+
+    .time-section {
+      border: 1px solid rgba(242,201,76,0.45);
+      border-radius: 13px;
+      background: rgba(255,255,255,0.04);
+      padding: 11px;
+    }
+
+    .time-title {
+      color: #f2c94c;
+      font-size: 15px;
+      font-weight: 900;
+      margin-bottom: 8px;
+    }
+
+    .time-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .time-box label {
+      display: block;
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 800;
+      margin-bottom: 5px;
+    }
+
+    .time-input-wrap {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      border: 1px solid #f2c94c;
+      border-radius: 12px;
+      background: #050505;
+      padding: 7px;
+    }
+
+    .time-input {
+      width: 100%;
+      border: none;
+      outline: none;
+      background: transparent;
+      color: #ffffff;
+      font-size: 20px;
+      font-weight: 900;
+      text-align: center;
+    }
+
+    .colon {
+      color: #f2c94c;
+      font-size: 22px;
+      font-weight: 900;
+    }
+
+    .app-message {
+      min-height: 42px;
+      border-radius: 12px;
+      border: 1px solid rgba(244,195,99,0.55);
+      background: rgba(10, 22, 36, 0.92);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 10px;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 900;
+      color: #f4c363;
+    }
+
+    .app-message.error {
+      color: #ff4040;
+      border-color: rgba(255,64,64,0.75);
+    }
+
+    .app-message.ok {
+      color: #58d45f;
+      border-color: rgba(88,212,95,0.75);
+    }
+
+    .bottom-bar {
+      margin-top: auto;
+      display: flex;
+      gap: 8px;
+    }
+
+    .box-btn {
+      flex: 1;
+      height: 46px;
+      border-radius: 13px;
+      background: linear-gradient(145deg, #f6d257, #a96f10);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      font-weight: 900;
+      color: #111;
+      cursor: pointer;
+      border: none;
+    }
+
+    .box-btn.secondary {
+      background: linear-gradient(145deg, #1a1a1a, #070707);
+      color: #f2c94c;
+      border: 1px solid #f2c94c;
+    }
+
+    @media (min-width: 701px) {
+      html, body {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+
+      body {
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 0;
+        background: #000000;
+      }
+
+      .page {
+        position: relative;
+        width: 430px;
+        max-width: 430px;
+        height: 920px;
+        min-height: 920px;
+        max-height: 920px;
+        margin: 0 auto;
+        border-radius: 48px;
+        padding: 74px 16px 18px;
+        background:
+          linear-gradient(180deg, rgba(18,18,18,0.98) 0%, rgba(7,7,7,0.98) 100%);
+        border: 3px solid rgba(242,201,76,0.92);
+        box-shadow:
+          0 0 0 3px rgba(255,255,255,0.05),
+          0 0 0 12px #000000,
+          0 0 35px rgba(242,201,76,0.30),
+          0 45px 90px rgba(0,0,0,0.85);
+        overflow: hidden;
+        transform-origin: center center;
+        transform: scale(min(calc((100vw - 80px) / 430), calc((100vh - 80px) / 920)));
+      }
+
+      .page::before {
+        content: "";
+        position: absolute;
+        top: 22px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 170px;
+        height: 35px;
+        background: #000000;
+        border-radius: 28px;
+        z-index: 5;
+      }
+
+      .page::after {
+        content: "";
+        position: absolute;
+        top: 36px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 58px;
+        height: 7px;
+        background: #222222;
+        border-radius: 20px;
+        z-index: 6;
+      }
+    }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    const supabaseClient = window.supabase.createClient(
+      'https://ksdcstrnsnqvqyyitcol.supabase.co',
+      'sb_publishable_TDzH5gP2zi9jwmUVLlWrQA_p4TiPTZ_'
+    );
+  </script>
+</head>
+
+<body>
+  <div class="page">
+
+    <div class="header">
+      <div class="back-btn" onclick="goHome()">
+        <span class="back-arrow">←</span>
+        <span>ÎNAPOI</span>
+      </div>
+
+      <div class="title">Setări</div>
+      <div class="subtitle">Program de lucru</div>
+    </div>
+
+    <div class="settings-card">
+
+      <div class="setting-row">
+        <div class="setting-text">
+          <div class="setting-title">Sâmbătă</div>
+          <div class="setting-sub">Zi deschisă sau închisă în Orar</div>
+        </div>
+        <button id="btnSambata" class="toggle" onclick="toggleSambata()">ÎNCHIS</button>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-text">
+          <div class="setting-title">Duminică</div>
+          <div class="setting-sub">Zi deschisă sau închisă în Orar</div>
+        </div>
+        <button id="btnDuminica" class="toggle" onclick="toggleDuminica()">ÎNCHIS</button>
+      </div>
+
+      <div class="time-section">
+        <div class="time-title">Interval oficial de lucru</div>
+
+        <div class="time-row">
+          <div class="time-box">
+            <label>De la</label>
+            <div class="time-input-wrap">
+              <input id="oraStartH" class="time-input" maxlength="2" placeholder="08" oninput="sariLaMinute('oraStartH','oraStartM')">
+              <div class="colon">:</div>
+              <input id="oraStartM" class="time-input" maxlength="2" placeholder="00" oninput="curataMinute('oraStartM')">
+            </div>
+          </div>
+
+          <div class="time-box">
+            <label>Până la</label>
+            <div class="time-input-wrap">
+              <input id="oraFinalH" class="time-input" maxlength="2" placeholder="22" oninput="sariLaMinute('oraFinalH','oraFinalM')">
+              <div class="colon">:</div>
+              <input id="oraFinalM" class="time-input" maxlength="2" placeholder="00" oninput="curataMinute('oraFinalM')">
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div id="appMessage" class="app-message">Se încarcă setările...</div>
+
+    <div class="bottom-bar">
+      <button class="box-btn secondary" onclick="goHome()">HOME</button>
+      <button class="box-btn" onclick="salveazaSetari()">SALVEAZĂ</button>
+    </div>
+
+  </div>
+
+  <script>
+    let sambataDeschis = true;
+    let duminicaDeschis = false;
+
+    function afiseazaMesaj(text, tip) {
+      const box = document.getElementById('appMessage');
+      if (!box) return;
+
+      box.className = 'app-message';
+
+      if (tip === 'error') box.classList.add('error');
+      if (tip === 'ok') box.classList.add('ok');
+
+      box.innerText = text;
+    }
+
+    function updateToggle(btnId, deschis) {
+      const btn = document.getElementById(btnId);
+      if (!btn) return;
+
+      btn.textContent = deschis ? 'DESCHIS' : 'ÎNCHIS';
+
+      if (deschis) {
+        btn.classList.add('open');
+      } else {
+        btn.classList.remove('open');
+      }
+    }
+
+    function toggleSambata() {
+      sambataDeschis = !sambataDeschis;
+      updateToggle('btnSambata', sambataDeschis);
+    }
+
+    function toggleDuminica() {
+      duminicaDeschis = !duminicaDeschis;
+      updateToggle('btnDuminica', duminicaDeschis);
+    }
+
+    function curataInput(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.value = el.value.replace(/\D/g, '').slice(0, 2);
+    }
+
+    function curataMinute(id) {
+      curataInput(id);
+    }
+
+    function sariLaMinute(idOra, idMinute) {
+      curataInput(idOra);
+      const ora = document.getElementById(idOra);
+      const minute = document.getElementById(idMinute);
+
+      if (ora && minute && ora.value.length === 2) {
+        minute.focus();
+      }
+    }
+
+    function puneOraInCampuri(prefix, oraText) {
+      const ora = String(oraText || '00:00').slice(0,5);
+      const parti = ora.split(':');
+
+      document.getElementById(prefix + 'H').value = parti[0] || '00';
+      document.getElementById(prefix + 'M').value = parti[1] || '00';
+    }
+
+    function citesteOraDinCampuri(prefix) {
+      const h = document.getElementById(prefix + 'H').value.trim();
+      const m = document.getElementById(prefix + 'M').value.trim();
+
+      return h.padStart(2, '0') + ':' + m.padStart(2, '0');
+    }
+
+    function oraValida(ora) {
+      return /^([0-1][0-9]|2[0-3]):([0-5][0-9])$/.test(ora);
+    }
+
+    async function incarcaSetari() {
+      try {
+        const { data, error } = await supabaseClient
+          .from('setari_orar')
+          .select('*')
+          .eq('id', 1)
+          .single();
+
+        if (error || !data) {
+          console.log('EROARE CITIRE SETARI:', error);
+          afiseazaMesaj('Nu pot citi setările.', 'error');
+          return;
+        }
+
+        sambataDeschis = data.sambata_deschis === true;
+        duminicaDeschis = data.duminica_deschis === true;
+
+        updateToggle('btnSambata', sambataDeschis);
+        updateToggle('btnDuminica', duminicaDeschis);
+
+        puneOraInCampuri('oraStart', data.ora_start || '08:00');
+        puneOraInCampuri('oraFinal', data.ora_final || '22:00');
+
+        afiseazaMesaj('Setările sunt încărcate.', 'ok');
+
+      } catch(e) {
+        console.log('EROARE SETARI:', e);
+        afiseazaMesaj('Eroare la citirea setărilor.', 'error');
+      }
+    }
+
+    async function salveazaSetari() {
+      const oraStart = citesteOraDinCampuri('oraStart');
+      const oraFinal = citesteOraDinCampuri('oraFinal');
+
+      if (!oraValida(oraStart)) {
+        afiseazaMesaj('Ora de început este greșită.', 'error');
+        return;
+      }
+
+      if (!oraValida(oraFinal)) {
+        afiseazaMesaj('Ora de final este greșită.', 'error');
+        return;
+      }
+
+      if (oraFinal <= oraStart) {
+        afiseazaMesaj('Ora finală trebuie să fie după ora de început.', 'error');
+        return;
+      }
+
+      const { error } = await supabaseClient
+        .from('setari_orar')
+        .update({
+          sambata_deschis: sambataDeschis,
+          duminica_deschis: duminicaDeschis,
+          ora_start: oraStart,
+          ora_final: oraFinal,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', 1);
+
+      if (error) {
+        console.log('EROARE SALVARE SETARI:', error);
+        afiseazaMesaj('Eroare la salvarea setărilor.', 'error');
+        return;
+      }
+
+      afiseazaMesaj('Setările au fost salvate.', 'ok');
+    }
+
+    function goHome() {
+      window.location.href = 'index_premium.html';
+    }
+
+    incarcaSetari();
+  </script>
+</body>
+</html>
