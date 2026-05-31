@@ -1439,6 +1439,7 @@
       ora_final: '22:00'
     };
     var deblocariOrar = [];
+    var deblocariTemporare = [];
     var slotPentruDeblocare = null;
 
     async function init() {
@@ -1862,6 +1863,14 @@
     }
 
     function esteDeblocatManual(dataIso, oraStart, oraFinal) {
+      var existaTemporar = deblocariTemporare.some(function(d) {
+        return String(d.data) === String(dataIso) &&
+               String(d.ora_start || '').slice(0,5) === oraStart &&
+               String(d.ora_final || '').slice(0,5) === oraFinal;
+      });
+
+      if (existaTemporar) return true;
+
       return deblocariOrar.some(function(d) {
         if (!d || d.activa !== true) return false;
         if (String(d.data) !== String(dataIso)) return false;
@@ -1929,21 +1938,20 @@
       var slot = slotPentruDeblocare;
       renuntaDeblocare();
 
-      const { error } = await supabaseClient
-        .from('deblocari_orar')
-        .insert([{
+      var exista = deblocariTemporare.some(function(d) {
+        return String(d.data) === String(slot.dataIso) &&
+               String(d.ora_start || '').slice(0,5) === slot.oraStart &&
+               String(d.ora_final || '').slice(0,5) === slot.oraFinal;
+      });
+
+      if (!exista) {
+        deblocariTemporare.push({
           data: slot.dataIso,
           ora_start: slot.oraStart,
-          ora_final: slot.oraFinal,
-          activa: true
-        }]);
-
-      if (error) {
-        console.log('EROARE DEBLOCARE SLOT PG3:', error);
-        return;
+          ora_final: slot.oraFinal
+        });
       }
 
-      await incarcaSetariSiDeblocari();
       oraSelectataIndex = slot.index;
       renderSlots();
 
@@ -2217,6 +2225,43 @@
     }
 
 
+    function slotSelectatEsteDeblocatTemporar() {
+      if (oraSelectataIndex === null) return false;
+
+      var zi = zile[ziSelectataIndex];
+      if (!zi) return false;
+
+      var oraStart = sloturi[oraSelectataIndex];
+      var oraFinal = getEndTime(oraSelectataIndex);
+
+      return deblocariTemporare.some(function(d) {
+        return String(d.data) === String(zi.dataIso) &&
+               String(d.ora_start || '').slice(0,5) === oraStart &&
+               String(d.ora_final || '').slice(0,5) === oraFinal;
+      });
+    }
+
+    async function salveazaDeblocareDacaEsteTemporara() {
+      if (!slotSelectatEsteDeblocatTemporar()) return;
+
+      var zi = zile[ziSelectataIndex];
+      var oraStart = sloturi[oraSelectataIndex];
+      var oraFinal = getEndTime(oraSelectataIndex);
+
+      const { error } = await supabaseClient
+        .from('deblocari_orar')
+        .insert([{
+          data: zi.dataIso,
+          ora_start: oraStart,
+          ora_final: oraFinal,
+          activa: true
+        }]);
+
+      if (error) {
+        console.log('EROARE SALVARE DEBLOCARE LA CONFIRMARE:', error);
+      }
+    }
+
     async function confirmAppointment() {
       if (!client) {
         showErrorPopup();
@@ -2271,6 +2316,7 @@
         } else if (data && data.id) {
           programareNoua.id = data.id;
           programareConfirmataId = data.id;
+          await salveazaDeblocareDacaEsteTemporara();
         }
       } catch(e) {
         console.log('EROARE SUPABASE PROGRAMARE:', e);
