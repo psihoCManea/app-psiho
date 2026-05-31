@@ -743,6 +743,7 @@
       ora_final: '22:00'
     };
     let deblocariOrar = [];
+    let deblocariTemporare = [];
     let slotPentruDeblocare = null;
 
     const ZILE_SCURT = ['Du', 'Lu', 'Ma', 'Mi', 'Jo', 'Vi', 'Sa'];
@@ -973,6 +974,14 @@
     }
 
     function esteDeblocatManual(dataIso, oraStart, oraFinal) {
+      const existaTemporar = deblocariTemporare.some(function(d) {
+        return String(d.data) === String(dataIso) &&
+               String(d.ora_start || '').slice(0,5) === oraStart &&
+               String(d.ora_final || '').slice(0,5) === oraFinal;
+      });
+
+      if (existaTemporar) return true;
+
       return deblocariOrar.some(function(d) {
         if (!d || d.activa !== true) return false;
         if (String(d.data) !== String(dataIso)) return false;
@@ -1024,22 +1033,20 @@
       const slot = slotPentruDeblocare;
       renuntaDeblocare();
 
-      const { error } = await supabaseClient
-        .from('deblocari_orar')
-        .insert([{
+      const exista = deblocariTemporare.some(function(d) {
+        return String(d.data) === String(slot.dataIso) &&
+               String(d.ora_start || '').slice(0,5) === slot.oraStart &&
+               String(d.ora_final || '').slice(0,5) === slot.oraFinal;
+      });
+
+      if (!exista) {
+        deblocariTemporare.push({
           data: slot.dataIso,
           ora_start: slot.oraStart,
-          ora_final: slot.oraFinal,
-          activa: true
-        }]);
-
-      if (error) {
-        console.log('EROARE DEBLOCARE SLOT MULTIPLE:', error);
-        afiseazaMesaj('Eroare la deblocarea slotului.', 'error');
-        return;
+          ora_final: slot.oraFinal
+        });
       }
 
-      await incarcaSetariSiDeblocari();
       toggleSelectieTemporara(slot.dataIso, slot.ziText, slot.oraStart, slot.oraFinal);
     }
 
@@ -1378,6 +1385,39 @@
       });
     }
 
+    function esteSelectieDeblocataTemporar(selectie) {
+      if (!selectie) return false;
+
+      return deblocariTemporare.some(function(d) {
+        return String(d.data) === String(selectie.dataIso) &&
+               String(d.ora_start || '').slice(0,5) === selectie.oraStart &&
+               String(d.ora_final || '').slice(0,5) === selectie.oraFinal;
+      });
+    }
+
+    async function salveazaDeblocariTemporareConfirmate() {
+      const deSalvat = selectiiTemporare
+        .filter(function(s) { return esteSelectieDeblocataTemporar(s); })
+        .map(function(s) {
+          return {
+            data: s.dataIso,
+            ora_start: s.oraStart,
+            ora_final: s.oraFinal,
+            activa: true
+          };
+        });
+
+      if (!deSalvat.length) return;
+
+      const { error } = await supabaseClient
+        .from('deblocari_orar')
+        .insert(deSalvat);
+
+      if (error) {
+        console.log('EROARE SALVARE DEBLOCARI MULTIPLE LA CONFIRMARE:', error);
+      }
+    }
+
     async function confirmareFinala() {
       if (!clientSelectat) {
         afiseazaMesaj('Selectează mai întâi clientul.', 'error');
@@ -1420,6 +1460,8 @@
           inchideConfirmare();
           return;
         }
+
+        await salveazaDeblocariTemporareConfirmate();
 
         const nr = selectiiTemporare.length;
 
