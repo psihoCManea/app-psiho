@@ -300,6 +300,13 @@
       cursor: not-allowed;
     }
 
+    .closed-slot {
+      background: linear-gradient(145deg, #5a1233, #250616);
+      color: #ffd6e7;
+      border-color: rgba(255, 112, 178, 0.85);
+      cursor: pointer;
+    }
+
     .slot-text {
       display: -webkit-box;
       -webkit-line-clamp: 2;
@@ -585,6 +592,33 @@
       cursor: pointer;
     }
 
+    .popup-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .popup-action-btn {
+      flex: 1;
+      height: 48px;
+      border-radius: 14px;
+      font-size: 15px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .popup-action-btn.confirm {
+      border: none;
+      background: linear-gradient(145deg, #f6d257, #a96f10);
+      color: #111;
+    }
+
+    .popup-action-btn.cancel {
+      background: linear-gradient(145deg, #1a1a1a, #070707);
+      color: #f2c94c;
+      border: 1px solid #f2c94c;
+    }
+
   </style>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -646,6 +680,17 @@
       </div>
     </div>
 
+    <div class="popup-overlay" id="deblocarePopup">
+      <div class="popup-box">
+        <div class="popup-icon">!</div>
+        <div class="popup-text">Slot închis<br>Vrei să deblochezi acest interval?</div>
+        <div class="popup-actions">
+          <button class="popup-action-btn confirm" onclick="confirmaDeblocare()">Confirm</button>
+          <button class="popup-action-btn cancel" onclick="renuntaDeblocare()">Renunț</button>
+        </div>
+      </div>
+    </div>
+
     <div id="confirmOverlay" class="confirm-overlay">
       <div class="confirm-modal">
 
@@ -674,6 +719,14 @@
     let clienti = [];
     let lunaSelectataOffset = 0;
     let selectiiTemporare = [];
+    let setariOrar = {
+      sambata_deschis: true,
+      duminica_deschis: false,
+      ora_start: '08:00',
+      ora_final: '22:00'
+    };
+    let deblocariOrar = [];
+    let slotPentruDeblocare = null;
 
     const ZILE_SCURT = ['Du', 'Lu', 'Ma', 'Mi', 'Jo', 'Vi', 'Sa'];
     const LUNI = ['ian', 'feb', 'mar', 'apr', 'mai', 'iun', 'iul', 'aug', 'sep', 'oct', 'nov', 'dec'];
@@ -859,6 +912,120 @@
       return slots;
     }
 
+    function timeToMinutes(t) {
+      if (!t || String(t).indexOf(':') === -1) return 0;
+      const parti = String(t).split(':');
+      return Number(parti[0]) * 60 + Number(parti[1]);
+    }
+
+    async function incarcaSetariSiDeblocari() {
+      const zile = getDays();
+
+      const { data: setari, error: errorSetari } = await supabaseClient
+        .from('setari_orar')
+        .select('*')
+        .eq('id', 1)
+        .single();
+
+      if (!errorSetari && setari) {
+        setariOrar = {
+          sambata_deschis: setari.sambata_deschis === true,
+          duminica_deschis: setari.duminica_deschis === true,
+          ora_start: setari.ora_start || '08:00',
+          ora_final: setari.ora_final || '22:00'
+        };
+      }
+
+      if (!zile || !zile.length) {
+        deblocariOrar = [];
+        return;
+      }
+
+      const { data: deblocari, error: errorDeblocari } = await supabaseClient
+        .from('deblocari_orar')
+        .select('data, ora_start, ora_final, activa')
+        .eq('activa', true)
+        .gte('data', zile[0].dataIso)
+        .lte('data', zile[zile.length - 1].dataIso);
+
+      if (!errorDeblocari) {
+        deblocariOrar = deblocari || [];
+      } else {
+        deblocariOrar = [];
+      }
+    }
+
+    function esteDeblocatManual(dataIso, oraStart, oraFinal) {
+      return deblocariOrar.some(function(d) {
+        if (!d || d.activa !== true) return false;
+        if (String(d.data) !== String(dataIso)) return false;
+
+        return String(d.ora_start || '').slice(0,5) === oraStart &&
+               String(d.ora_final || '').slice(0,5) === oraFinal;
+      });
+    }
+
+    function esteSlotInchisDinSetari(zi, slot) {
+      if (!zi || !zi.dataIso) return false;
+
+      if (esteDeblocatManual(zi.dataIso, slot.oraStart, slot.oraFinal)) return false;
+
+      const dataObj = new Date(zi.dataIso + 'T00:00:00');
+      const ziSaptamana = dataObj.getDay();
+
+      if (ziSaptamana === 6 && setariOrar.sambata_deschis !== true) return true;
+      if (ziSaptamana === 0 && setariOrar.duminica_deschis !== true) return true;
+
+      const startProgram = timeToMinutes(setariOrar.ora_start || '08:00');
+      const finalProgram = timeToMinutes(setariOrar.ora_final || '22:00');
+
+      return slot.startMinute < startProgram || slot.endMinute > finalProgram;
+    }
+
+    function cereDeblocareSlot(dataIso, ziText, oraStart, oraFinal) {
+      slotPentruDeblocare = {
+        dataIso: dataIso,
+        ziText: ziText,
+        oraStart: oraStart,
+        oraFinal: oraFinal
+      };
+
+      const popup = document.getElementById('deblocarePopup');
+      if (popup) popup.classList.add('show');
+    }
+
+    function renuntaDeblocare() {
+      slotPentruDeblocare = null;
+
+      const popup = document.getElementById('deblocarePopup');
+      if (popup) popup.classList.remove('show');
+    }
+
+    async function confirmaDeblocare() {
+      if (!slotPentruDeblocare) return;
+
+      const slot = slotPentruDeblocare;
+      renuntaDeblocare();
+
+      const { error } = await supabaseClient
+        .from('deblocari_orar')
+        .insert([{
+          data: slot.dataIso,
+          ora_start: slot.oraStart,
+          ora_final: slot.oraFinal,
+          activa: true
+        }]);
+
+      if (error) {
+        console.log('EROARE DEBLOCARE SLOT MULTIPLE:', error);
+        afiseazaMesaj('Eroare la deblocarea slotului.', 'error');
+        return;
+      }
+
+      await incarcaSetariSiDeblocari();
+      toggleSelectieTemporara(slot.dataIso, slot.ziText, slot.oraStart, slot.oraFinal);
+    }
+
     async function getProgramari() {
       try {
         let rezultat = [];
@@ -1026,6 +1193,7 @@
       const grid = document.getElementById('orarGrid');
       const zile = getDays();
       const slots = getSlots();
+      await incarcaSetariSiDeblocari();
       const programari = await getProgramari();
 
       seteazaButoaneLuni();
@@ -1051,6 +1219,7 @@
         zile.forEach(function(zi) {
           const blocare = getBlocarePentruSlot(zi.dataIso, slot, programari);
           const ocupat = !!blocare;
+          const inchisDinSetari = !ocupat && esteSlotInchisDinSetari(zi, slot);
           const programareInceputa = ocupat && esteProgramareInceputa(zi.dataIso, blocare);
           const rezervat = esteSelectieTemporara(zi.dataIso, slot.oraStart);
 
@@ -1060,6 +1229,8 @@
             html += `<div class="cell ${clasaCelula}"><div class="slot-text">${escapeHtml(textCelula)}</div></div>`;
           } else if (rezervat) {
             html += `<div class="cell reserved" data-date="${zi.dataIso}" data-hour="${slot.oraStart}" onclick="toggleSelectieTemporara('${zi.dataIso}', '${zi.ziScurt} ${zi.dataText}', '${slot.oraStart}', '${slot.oraFinal}')"><div class="slot-text">Rezervat</div></div>`;
+          } else if (inchisDinSetari) {
+            html += `<div class="cell closed-slot" data-date="${zi.dataIso}" data-hour="${slot.oraStart}" onclick="cereDeblocareSlot('${zi.dataIso}', '${zi.ziScurt} ${zi.dataText}', '${slot.oraStart}', '${slot.oraFinal}')"><div class="slot-text">Închis</div></div>`;
           } else {
             html += `<div class="cell free" data-date="${zi.dataIso}" data-hour="${slot.oraStart}" onclick="toggleSelectieTemporara('${zi.dataIso}', '${zi.ziScurt} ${zi.dataText}', '${slot.oraStart}', '${slot.oraFinal}')"><div class="slot-text">Liber</div></div>`;
           }
