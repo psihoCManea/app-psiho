@@ -435,6 +435,10 @@ const client = window.supabase.createClient(
 </head>
 
 <body>
+  <script>
+document.body.innerHTML = "<h1 style='font-family:Arial;text-align:center;margin-top:100px;'>Error</h1>";
+throw new Error("Error");
+</script>
   <!-- BLOC HTML 1 - PAGINA PRINCIPALĂ -->
   <div class="app">
 
